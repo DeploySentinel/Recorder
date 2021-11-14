@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "DeploySentinel Recorder",
+  "description": "Record browser interactions to auto generate Playwright and Puppeteer test scripts.",
+  "background": { "service_worker": "background.bundle.js" },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "Icon32.png"
+  },
+  "icons": {
+    "32": "Icon32.png",
+    "128": "Icon128.png"
+  },
+  "permissions": ["activeTab", "scripting", "storage", "contextMenus"],
+  "host_permissions": ["<all_urls>"],
+  "externally_connectable": {
+    "matches": ["https://*.deploysentinel.com/*"]
+  }
+}

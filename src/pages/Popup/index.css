@@ -1,0 +1,15 @@
+body {
+  width: 420px;
+  height: 260px;
+  overflow-y: auto;
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  position: relative;
+
+  font-size: 16px;
+
+  background: #080a0b;
+}

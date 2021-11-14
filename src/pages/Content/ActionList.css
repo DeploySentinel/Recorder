@@ -1,0 +1,19 @@
+.ActionListItem {
+  background: #2e273b;
+  color: #c4c4c4;
+  font-size: 16px;
+  padding: 0.75em 1em;
+  border-radius: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.ActionListItem .em-text {
+  color: #ffffff;
+  font-weight: 400;
+}
+
+.ActionListItem .mono {
+  color: #ffffff;
+  font-family: monospace;
+  font-size: 1em;
+}

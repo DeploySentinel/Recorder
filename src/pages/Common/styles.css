@@ -1,0 +1,175 @@
+.btn-primary {
+  font-family: inherit; /* 1 */
+  font-size: 100%; /* 1 */
+  line-height: 1.15; /* 1 */
+  margin: 0; /* 2 */
+  border: 0;
+  user-select: none;
+
+  background: linear-gradient(89.91deg, #8256d0 0.06%, #245ab2 99.9%);
+  border-radius: 5px;
+  padding: 15px 35px;
+  color: white;
+  font-weight: 500;
+  font-size: 18px;
+
+  transition: opacity 0.2s;
+}
+.btn-primary:hover {
+  opacity: 0.9;
+  cursor: pointer;
+}
+
+.btn-primary-outline {
+  font-family: inherit; /* 1 */
+  font-size: 100%; /* 1 */
+  line-height: 1.15; /* 1 */
+  margin: 0; /* 2 */
+  background: transparent;
+  position: relative;
+  user-select: none;
+
+  border-radius: 5px;
+  padding: 15px 35px;
+  color: white;
+  font-weight: 500;
+  font-size: 18px;
+  border: 0;
+
+  transition: opacity 0.2s;
+}
+.btn-primary-outline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 5px;
+  padding: 2px;
+  background: linear-gradient(89.91deg, #8256d0 0.06%, #245ab2 99.9%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
+}
+.btn-primary-outline:hover {
+  opacity: 0.9;
+  cursor: pointer;
+}
+
+/* Components */
+.link-button {
+  cursor: pointer;
+  border-bottom: 1px solid #c4c4c4;
+  white-space: nowrap;
+  flex-shrink: 0;
+  color: white;
+  user-select: none;
+  transition: color 0.2s;
+}
+.link-button:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.text-button {
+  color: white;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s;
+}
+.text-button:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Flex Utilities */
+.d-flex {
+  display: flex;
+}
+.justify-between {
+  justify-content: space-between;
+}
+.items-center {
+  align-items: center;
+}
+.items-end {
+  align-items: flex-end;
+}
+
+/* Sizing Utils */
+.w-100 {
+  width: 100%;
+}
+
+/* Padding Utils */
+.p-1 {
+  padding: 0.25em;
+}
+.p-2 {
+  padding: 0.5em;
+}
+.p-4 {
+  padding: 1em;
+}
+
+/* Margin Utils */
+.m-4 {
+  margin: 1em;
+}
+.my-8 {
+  margin-top: 2em;
+  margin-bottom: 2em;
+}
+.mt-4 {
+  margin-top: 1em;
+}
+.mt-6 {
+  margin-top: 1.5em;
+}
+.mt-8 {
+  margin-top: 2em;
+}
+.mt-12 {
+  margin-top: 3em;
+}
+.mr-1 {
+  margin-right: 0.25em;
+}
+.mr-2 {
+  margin-right: 0.5em;
+}
+.mb-2 {
+  margin-bottom: 0.5em;
+}
+.mb-4 {
+  margin-bottom: 1em;
+}
+
+/* Text Utils */
+.text-sm {
+  font-size: 0.875em;
+  line-height: 1.25em;
+}
+.text-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+.text-xl {
+  font-size: 1.25em;
+  line-height: 1.75em;
+}
+
+/* Text Colors */
+.text-grey {
+  color: #c4c4c4;
+}
+.text-green {
+  color: #6ac46d !important;
+}
+.text-red {
+  color: #ff5d5b;
+}
+
+/* Bold */
+.font-bold {
+  font-weight: 700;
+}

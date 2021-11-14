@@ -1,0 +1,17 @@
+div#Highlighter-outline {
+  pointer-events: none !important;
+  position: fixed !important;
+  background: #ff5d5b26 !important;
+  border: 3px solid #ff5d5b !important;
+  z-index: 2147483647 !important;
+}
+div#Highlighter-label {
+  pointer-events: none !important;
+  position: fixed !important;
+  background: #080a0b !important;
+  color: white !important;
+  padding: 8px !important;
+  font-family: monospace !important;
+  border-radius: 5px !important;
+  z-index: 2147483647 !important;
+}

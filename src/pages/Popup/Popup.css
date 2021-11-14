@@ -1,0 +1,27 @@
+:root {
+  color-scheme: dark;
+}
+
+.Popup {
+  height: 100%;
+  padding: 1.5em;
+  background-color: #282c34;
+  color: white;
+}
+
+.text-center {
+  text-align: center;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar,
+::-webkit-scrollbar-corner {
+  background: rgba(0, 0, 0, 0);
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background: rgba(100, 100, 100, 0.8);
+}

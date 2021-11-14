@@ -1,0 +1,51 @@
+.ControlBar {
+  align-items: center;
+  border-radius: 5px;
+  background: #080a0b;
+  color: white;
+
+  font-size: 16px;
+  font-family: 'Roboto', sans-serif;
+
+  margin-left: auto;
+  margin-right: auto;
+
+  overflow: hidden;
+  position: fixed;
+  bottom: 35px;
+  left: 0px;
+  right: 0px;
+
+  width: 650px;
+  z-index: 2147483647;
+}
+
+.ControlBar .ActionButton {
+  min-width: 80px;
+  width: 80px;
+  height: 100px;
+  background: #3788f6;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ControlBar .ActionButton:hover {
+  background: #3787f6c0;
+}
+
+.ControlBar .last-action-preview {
+  font-size: 18px;
+  max-width: 360px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ControlBar .actions-wrapper {
+  height: 200px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  border-top: 1px solid #767676;
+}
