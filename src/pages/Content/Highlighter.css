@@ -1,4 +1,5 @@
 div#Highlighter-outline {
+  box-sizing: border-box;
   pointer-events: none !important;
   position: fixed !important;
   background: #ff5d5b26 !important;
