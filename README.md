@@ -7,6 +7,10 @@ Simply step through your website while recording with DeploySentinel Recorder
 and the extension will convert the captured user flow into a Playwright or
 Puppeteer script.
 
+**Demo:**
+
+![Demo](assets/demo.gif)
+
 # Features
 
 - Automatically capture clicks, keyboard inputs, window resizes, and scroll
