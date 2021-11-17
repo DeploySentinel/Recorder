@@ -121,12 +121,12 @@ localStorageGet(['recordingState']).then(({ recordingState }) => {
 });
 
 chrome.storage.onChanged.addListener((changes) => {
-  if (changes.recordingState.newValue == 'active') {
+  if (changes?.recordingState?.newValue == 'active') {
     chrome.contextMenus.update(CTX_MENU_ID, {
       enabled: true,
     });
   }
-  if (changes.recordingState.newValue == 'finished') {
+  if (changes?.recordingState?.newValue == 'finished') {
     chrome.contextMenus.update(CTX_MENU_ID, {
       enabled: false,
     });
