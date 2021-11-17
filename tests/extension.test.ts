@@ -84,6 +84,6 @@ test('can click through recording steps', async () => {
     expect.stringContaining("page.type('#searchInput', 'tacos');")
   );
   expect(content).toEqual(
-    expect.stringContaining("page.press('#searchInput', 'Enter');")
+    expect.stringContaining("page.press('#searchInput', 'Enter'),")
   );
 });

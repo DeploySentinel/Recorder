@@ -21,12 +21,26 @@ ${lines}
 })();`;
   }
 
-  click(selector: string) {
-    return `await page.click('${selector}');`;
+  private waitForNavigation() {
+    return `page.waitForNavigation()`;
   }
 
-  hover(selector: string) {
-    return `await page.hover('${selector}');`;
+  private waitForActionAndNavigation(action: string) {
+    return `await Promise.all([\n    ${action},\n    ${this.waitForNavigation()}\n  ]);`;
+  }
+
+  click(selector: string, causesNavigation: boolean) {
+    const actionStr = `page.click('${selector}')`;
+    return causesNavigation
+      ? this.waitForActionAndNavigation(actionStr)
+      : `await ${actionStr};`;
+  }
+
+  hover(selector: string, causesNavigation: boolean) {
+    const actionStr = `page.hover('${selector}')`;
+    return causesNavigation
+      ? this.waitForActionAndNavigation(actionStr)
+      : `await ${actionStr};`;
   }
 
   load(url: string) {
@@ -37,16 +51,25 @@ ${lines}
     return `await page.setViewportSize({ width: ${width}, height: ${height} });`;
   }
 
-  input(selector: string, value: string) {
-    return `await page.type('${selector}', '${value}');`;
+  input(selector: string, value: string, causesNavigation: boolean) {
+    const actionStr = `page.type('${selector}', '${value}')`;
+    return causesNavigation
+      ? this.waitForActionAndNavigation(actionStr)
+      : `await ${actionStr};`;
   }
 
-  select(selector: string, option: string) {
-    return `await page.selectOption('${selector}', '${option}');`;
+  select(selector: string, option: string, causesNavigation: boolean) {
+    const actionStr = `page.selectOption('${selector}', '${option}')`;
+    return causesNavigation
+      ? this.waitForActionAndNavigation(actionStr)
+      : `await ${actionStr};`;
   }
 
-  keydown(selector: string, key: string) {
-    return `await page.press('${selector}', '${key}');`;
+  keydown(selector: string, key: string, causesNavigation: boolean) {
+    const actionStr = `page.press('${selector}', '${key}')`;
+    return causesNavigation
+      ? this.waitForActionAndNavigation(actionStr)
+      : `await ${actionStr};`;
   }
 
   wheel(deltaX: number, deltaY: number) {
