@@ -86,4 +86,9 @@ test('can click through recording steps', async () => {
   expect(content).toEqual(
     expect.stringContaining("page.press('#searchInput', 'Enter'),")
   );
+  expect(content).toEqual(
+    expect.stringContaining(
+      'page.click(\'[href="/wiki/Corn_tortilla"]:nth-child(7)\'),'
+    )
+  );
 });

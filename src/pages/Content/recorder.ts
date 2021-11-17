@@ -243,17 +243,19 @@ class Recorder {
 
   private onHover = (request: any) => {
     // Context menu was clicked, pull last context menu element
-    if (request != null && request.type === 'onHoverCtxMenu') {
-      if (this.lastContextMenuEvent != null) {
-        const action = {
-          ...buildBaseAction(this.lastContextMenuEvent),
-          type: 'hover',
-          selectors: genSelectors(
-            this.lastContextMenuEvent.target as HTMLElement
-          ),
-        };
-        this.appendToRecording(action);
-      }
+    if (
+      request != null &&
+      request.type === 'onHoverCtxMenu' &&
+      this.lastContextMenuEvent != null
+    ) {
+      const action = {
+        ...buildBaseAction(this.lastContextMenuEvent),
+        type: 'hover',
+        selectors: genSelectors(
+          this.lastContextMenuEvent.target as HTMLElement
+        ),
+      };
+      this.appendToRecording(action);
     }
   };
 

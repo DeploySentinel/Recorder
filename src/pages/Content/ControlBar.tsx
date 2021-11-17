@@ -100,7 +100,7 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
   const [showAllActions, setShowAllActions] = useState<boolean>(false);
   const [showActionsMode, setShowActionsMode] = useState<
     'actions' | 'playwright' | 'puppeteer'
-  >('actions');
+  >('playwright');
   const [copyCodeConfirm, setCopyCodeConfirm] = useState<boolean>(false);
 
   const [isFinished, setIsFinished] = useState<boolean>(false);

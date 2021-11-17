@@ -74,8 +74,11 @@ export default function genSelectors(element: HTMLElement | null) {
   ]);
 
   // Certain apps don't have unique ids (ex. youtube)
-  const idSelector = genSelectorForAttributes(element, ['id']);
-
+  const idSelector = isAttributesDefined(element, ['id'])
+    ? finder(element, {
+        attr: (name) => name === 'id',
+      })
+    : null;
   return {
     id: idSelector,
     generalSelector,
