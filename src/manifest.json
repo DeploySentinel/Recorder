@@ -11,7 +11,13 @@
     "32": "Icon32.png",
     "128": "Icon128.png"
   },
-  "permissions": ["activeTab", "scripting", "storage", "contextMenus"],
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "contextMenus",
+    "webNavigation"
+  ],
   "host_permissions": ["<all_urls>"],
   "externally_connectable": {
     "matches": ["https://*.deploysentinel.com/*"]

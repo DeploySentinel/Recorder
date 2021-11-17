@@ -2,23 +2,61 @@ import { setEndRecordingStorage, localStorageGet } from '../Common/utils';
 
 const CTX_MENU_ID = 'deploysentinel-menu-id';
 
-function getTab(tabId: number) {
-  return new Promise<chrome.tabs.Tab>((resolve, reject) => {
-    try {
-      chrome.tabs.get(tabId, (tab) => {
-        resolve(tab);
-      });
-    } catch (error) {
-      reject(error);
-    }
-  });
-}
-
 function injectContentScript(tabId: number) {
   chrome.scripting.executeScript({
     target: { tabId },
     files: ['contentScript.bundle.js'],
   });
+}
+
+async function recordNavigationEvent(
+  url: string,
+  transitionType: string,
+  transitionQualifiers: string[],
+  recording: any[]
+) {
+  const navigationEvent = {
+    type: 'navigate',
+    url,
+    transitionType,
+    transitionQualifiers,
+  };
+
+  const newRecording = [
+    ...recording,
+    {
+      ...navigationEvent,
+    },
+  ];
+
+  await chrome.storage.local.set({ recording: newRecording });
+}
+
+async function onNavEvent(
+  details: chrome.webNavigation.WebNavigationTransitionCallbackDetails
+) {
+  const { tabId, url, transitionType, transitionQualifiers, frameId } = details;
+  const { recording, recordingTabId, recordingState } = await localStorageGet([
+    'recording',
+    'recordingState',
+    'recordingTabId',
+  ]);
+
+  // Check if it's a parent frame, we're recording, and it's the right tabid
+  if (
+    frameId !== 0 ||
+    recordingState !== 'active' ||
+    recordingTabId !== tabId
+  ) {
+    return;
+  }
+
+  await recordNavigationEvent(
+    url,
+    transitionType,
+    transitionQualifiers,
+    recording
+  );
 }
 
 // Set recording as ended when the recording tab is closed
@@ -29,41 +67,36 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
   }
 });
 
-chrome.tabs.onUpdated.addListener(async (tabId: number, changeInfo: any) => {
-  if (changeInfo.status === 'complete') {
-    const { recordingTabId, recordingState, recording } = await localStorageGet(
-      ['recordingTabId', 'recordingState', 'recording']
-    );
-    if (tabId != recordingTabId || recordingState != 'active') {
-      return;
-    }
+chrome.webNavigation.onHistoryStateUpdated.addListener(onNavEvent);
+chrome.webNavigation.onReferenceFragmentUpdated.addListener(onNavEvent);
+chrome.webNavigation.onCommitted.addListener(onNavEvent);
 
-    const tab = await getTab(tabId);
+chrome.webNavigation.onCompleted.addListener(async (details) => {
+  const { tabId, frameId } = details;
 
-    const navigationEvent = {
-      type: 'navigate',
-      url: tab.url,
-      source: 'user',
-    };
-
-    const newRecording = [
-      ...recording,
-      {
-        ...navigationEvent,
-      },
-    ];
-
-    chrome.storage.local.set({ recording: newRecording });
-    injectContentScript(tabId);
+  if (frameId !== 0) {
+    return;
   }
+
+  const { recordingTabId, recordingState } = await localStorageGet([
+    'recordingTabId',
+    'recordingState',
+  ]);
+  if (tabId != recordingTabId || recordingState != 'active') {
+    return;
+  }
+
+  injectContentScript(tabId);
 });
 
+chrome.contextMenus.removeAll();
 chrome.contextMenus.create({
   title: 'Record hover over element',
   contexts: ['all'],
   id: CTX_MENU_ID,
   enabled: false,
 });
+
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (typeof tab === 'undefined') {
     return;

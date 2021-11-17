@@ -141,6 +141,14 @@ class Recorder {
     this._recording = [];
     localStorageGet(['recording']).then(({ recording }) => {
       this._recording = recording;
+
+      // Watch for changes to the recording from the background worker (when a SPA navigation happens)
+      chrome.storage.onChanged.addListener((changes) => {
+        if (changes.recording != null) {
+          this._recording = changes.recording.newValue;
+        }
+      });
+
       // Omitting change and submit events
       ['click'].map((eventName) => {
         window.addEventListener(eventName, this.listener, true);
