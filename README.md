@@ -7,7 +7,9 @@ Simply step through your website while recording with DeploySentinel Recorder
 and the extension will convert the captured user flow into a Playwright or
 Puppeteer script.
 
-**Demo:**
+[![Chrome Store Icon](assets/ChromeStoreIcon.png)](https://chrome.google.com/webstore/detail/deploysentinel-recorder/geggbdbnidkhbnbjoganapfhkpgkndfo)
+
+# Demo
 
 ![Demo](assets/demo.gif)
 
@@ -60,6 +62,10 @@ feel free to open an issue or PR for what you think is missing.
 
 # Development Instructions
 
-Start Local Webpack: `yarn run start`
+Install Dependencies: `yarn`
+
+Start Local Webpack Dev Server: `yarn run start`
 
 Build Compressed Chrome Extension: `yarn run build`
+
+Run E2E Tests: `yarn test`
