@@ -36,7 +36,8 @@ export type Action =
       source: string;
     }
   | ResizeAction
-  | { type: 'wheel'; deltaY: number; deltaX: number };
+  | { type: 'wheel'; deltaY: number; deltaX: number }
+  | { type: 'fullScreenshot' };
 
 function isEventFromOverlay(event: Event) {
   return (
@@ -308,6 +309,7 @@ class Recorder {
       timestamp: event.timeStamp,
     };
 
+    // @ts-ignore
     this.appendToRecording(action);
   };
 
@@ -319,7 +321,7 @@ class Recorder {
       lastResizeAction.width !== width ||
       lastResizeAction.height !== height
     ) {
-      const action = {
+      const action: Action = {
         type: 'resize',
         width,
         height,
@@ -341,6 +343,14 @@ class Recorder {
   };
 
   private debouncedOnResize = debounce(this.onResize, 300);
+
+  public onFullScreenshot = (): void => {
+    const action: Action = {
+      type: 'fullScreenshot',
+    };
+
+    this.appendToRecording(action);
+  };
 }
 
 export default Recorder;

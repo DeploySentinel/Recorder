@@ -1,7 +1,7 @@
 import playwright from 'playwright';
 import type { BrowserContext, Worker } from 'playwright';
 
-jest.setTimeout(10000);
+jest.setTimeout(15000);
 
 function waitForServiceWorkers(
   browser: BrowserContext,
@@ -27,7 +27,7 @@ function waitForServiceWorkers(
 let extensionId = '';
 let browserContext: BrowserContext | null = null;
 beforeAll(async () => {
-  const userDataDir = '/tmp/test-user-data-dir';
+  const userDataDir = '/tmp/deploysentinel-recorder-test-user-data-dir';
   browserContext = await playwright['chromium'].launchPersistentContext(
     userDataDir,
     {
@@ -52,7 +52,7 @@ test('extension is installed', async () => {
   expect(extensionId).toBeTruthy();
 });
 
-test('can click through recording steps', async () => {
+test('control bar shows correct actions during recording', async () => {
   expect(browserContext).toBeTruthy();
   if (browserContext == null) {
     return;
@@ -68,6 +68,56 @@ test('can click through recording steps', async () => {
   await page.type('#searchInput', 'tacos', { delay: 100 });
   await page.press('#searchInput', 'Enter', { delay: 100 });
   await page.click('[href="/wiki/Corn_tortilla"]:nth-child(7)');
+
+  // Take Screenshot
+  await page.click('[data-testid="show-more-actions"]');
+  await page.click('[data-testid="record-screenshot"]');
+
+  // Show actions in control bar
+  await page.click('[data-testid="show-actions"]');
+
+  const content = await page.textContent('[data-testid="action-list"]');
+  expect(content).toEqual(
+    expect.stringContaining('Click on input #searchInput')
+  );
+  expect(content).toEqual(
+    expect.stringContaining('Fill "tacos" on #searchInput')
+  );
+  expect(content).toEqual(
+    expect.stringContaining('Press "Enter" on #searchInput')
+  );
+  expect(content).toEqual(expect.stringContaining('Click on link "corn"'));
+  expect(content).toEqual(expect.stringContaining('Take full page screenshot'));
+
+  // End test
+  await page.click('[data-testid="end-test"]');
+  expect(await page.textContent('[data-testid="recording-finished"]')).toEqual(
+    'Recording Finished!'
+  );
+
+  await page.close();
+});
+
+test('can click through recording steps and it generates the right code', async () => {
+  expect(browserContext).toBeTruthy();
+  if (browserContext == null) {
+    return;
+  }
+
+  const page = await browserContext.newPage();
+  await page.goto(`chrome-extension://${extensionId}/popup.html`);
+
+  await page.click('[data-testid="record-new-test"]');
+
+  await page.goto('https://wikipedia.com');
+  await page.click('#searchInput');
+  await page.type('#searchInput', 'tacos', { delay: 100 });
+  await page.press('#searchInput', 'Enter', { delay: 100 });
+  await page.click('[href="/wiki/Corn_tortilla"]:nth-child(7)');
+
+  // Take Screenshot
+  await page.click('[data-testid="show-more-actions"]');
+  await page.click('[data-testid="record-screenshot"]');
 
   await page.goto(`chrome-extension://${extensionId}/popup.html`);
   await page.click('[data-testid="end-test-recording"]');
@@ -91,4 +141,11 @@ test('can click through recording steps', async () => {
       'page.click(\'[href="/wiki/Corn_tortilla"]:nth-child(7)\'),'
     )
   );
+  expect(content).toEqual(
+    expect.stringContaining(
+      "await page.screenshot({ path: 'screenshot.png', fullPage: true });"
+    )
+  );
+
+  await page.close();
 });

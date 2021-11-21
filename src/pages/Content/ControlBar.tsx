@@ -4,6 +4,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  faCamera,
   faCopy,
   faCheck,
   faCheckCircle,
@@ -26,12 +27,14 @@ const ActionButton = ({
   onClick,
   children,
   label,
+  testId,
 }: {
   onClick: () => void;
   children: JSX.Element;
   label: String;
+  testId?: String;
 }) => (
-  <div className="ActionButton" onClick={onClick}>
+  <div className="ActionButton" onClick={onClick} data-testId={testId}>
     <div>
       <div
         style={{
@@ -76,6 +79,8 @@ function RenderActionText({ action }: { action: Action }) {
         ? `Resize window to ${action.width} x ${action.height}`
         : action.type === 'wheel'
         ? `Scroll wheel by X:${action.deltaX}, Y:${action.deltaY}`
+        : action.type === 'fullScreenshot'
+        ? `Take full page screenshot`
         : ''}
     </>
   );
@@ -102,6 +107,7 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
     'actions' | 'playwright' | 'puppeteer'
   >('playwright');
   const [copyCodeConfirm, setCopyCodeConfirm] = useState<boolean>(false);
+  const [screenshotConfirm, setScreenshotConfirm] = useState<boolean>(false);
 
   const [isFinished, setIsFinished] = useState<boolean>(false);
 
@@ -208,7 +214,10 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
           <div className="p-4">
             <div className="d-flex justify-between mb-2">
               <div className="text-xl">
-                <span className="mr-2">Recording Finished!</span>🎉
+                <span className="mr-2" data-testId="recording-finished">
+                  Recording Finished!
+                </span>
+                🎉
               </div>
               <div className="text-button" onClick={() => onClose()}>
                 <FontAwesomeIcon icon={faTimes} size="sm" />
@@ -233,7 +242,11 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
           </div>
         ) : (
           <div className="d-flex items-center">
-            <ActionButton label="End Test" onClick={() => onEndRecording()}>
+            <ActionButton
+              label="End Test"
+              onClick={() => onEndRecording()}
+              testId="end-test"
+            >
               <FontAwesomeIcon icon={faCheckCircle} size="2x" />
             </ActionButton>
             <div className="w-100 p-4">
@@ -254,9 +267,12 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
                 </div>
                 <div
                   className="text-sm link-button"
+                  data-testid={
+                    showAllActions ? 'show-less-actions' : 'show-more-actions'
+                  }
                   onClick={() => setShowAllActions(!showAllActions)}
                 >
-                  {showAllActions ? 'Hide' : 'See'} Prior Steps{' '}
+                  {showAllActions ? 'Show Less' : 'Show More'}{' '}
                   <FontAwesomeIcon
                     icon={showAllActions ? faChevronUp : faChevronDown}
                   />
@@ -271,58 +287,78 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
               <div className="mb-4">
                 <span
                   className="text-sm link-button mr-2"
+                  data-testId={`show-${
+                    showActionsMode === 'actions' ? 'code' : 'actions'
+                  }`}
                   onClick={() => {
                     setShowActionsMode(
                       showActionsMode === 'actions' ? 'playwright' : 'actions'
                     );
                   }}
                 >
-                  Show{' '}
-                  {showActionsMode === 'actions' ? 'Generated Code' : 'Actions'}
+                  Show {showActionsMode === 'actions' ? 'Code' : 'Actions'}
                 </span>
-                {(showActionsMode === 'playwright' ||
-                  showActionsMode === 'puppeteer') && (
-                  <span
-                    className="text-sm link-button mb-4"
-                    onClick={() => {
-                      setShowActionsMode(
-                        showActionsMode === 'playwright'
-                          ? 'puppeteer'
-                          : 'playwright'
-                      );
-                    }}
-                  >
-                    Switch to{' '}
-                    {showActionsMode === 'playwright'
-                      ? 'Puppeteer'
-                      : 'Playwright'}
-                  </span>
-                )}
+                <span
+                  className={`text-sm link-button mr-2 ${
+                    screenshotConfirm ? 'text-green' : ''
+                  }`}
+                  data-testid="record-screenshot"
+                  onClick={() => {
+                    recorderRef.current?.onFullScreenshot();
+                    setScreenshotConfirm(true);
+                    setTimeout(() => {
+                      setScreenshotConfirm(false);
+                    }, 2000);
+                  }}
+                >
+                  <FontAwesomeIcon
+                    icon={screenshotConfirm ? faCheck : faCamera}
+                    size="sm"
+                  />{' '}
+                  Record Screenshot
+                </span>
               </div>
               <div>
                 {(showActionsMode === 'playwright' ||
                   showActionsMode === 'puppeteer') && (
-                  <CopyToClipboard
-                    text={genCode(actions, true, showActionsMode)}
-                    onCopy={() => {
-                      setCopyCodeConfirm(true);
-                      setTimeout(() => {
-                        setCopyCodeConfirm(false);
-                      }, 2000);
-                    }}
-                  >
+                  <>
                     <span
-                      className={`text-sm link-button ${
-                        copyCodeConfirm ? 'text-green' : ''
-                      }`}
+                      className="text-sm link-button mb-4 mr-4"
+                      onClick={() => {
+                        setShowActionsMode(
+                          showActionsMode === 'playwright'
+                            ? 'puppeteer'
+                            : 'playwright'
+                        );
+                      }}
                     >
-                      <FontAwesomeIcon
-                        icon={copyCodeConfirm ? faCheck : faCopy}
-                        size="sm"
-                      />{' '}
-                      Copy Code
+                      Switch to{' '}
+                      {showActionsMode === 'playwright'
+                        ? 'Puppeteer'
+                        : 'Playwright'}
                     </span>
-                  </CopyToClipboard>
+                    <CopyToClipboard
+                      text={genCode(actions, true, showActionsMode)}
+                      onCopy={() => {
+                        setCopyCodeConfirm(true);
+                        setTimeout(() => {
+                          setCopyCodeConfirm(false);
+                        }, 2000);
+                      }}
+                    >
+                      <span
+                        className={`text-sm link-button ${
+                          copyCodeConfirm ? 'text-green' : ''
+                        }`}
+                      >
+                        <FontAwesomeIcon
+                          icon={copyCodeConfirm ? faCheck : faCopy}
+                          size="sm"
+                        />{' '}
+                        Copy Code
+                      </span>
+                    </CopyToClipboard>
+                  </>
                 )}
               </div>
             </div>

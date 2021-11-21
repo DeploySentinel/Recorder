@@ -56,7 +56,7 @@ feel free to open an issue or PR for what you think is missing.
 | Copy Code to Clipboard         | ✅                      | ✅                | ❌                        | ✅                     |
 | data-testid Selector Support   | ✅                      | ✅                | ❌                        | ✅                     |
 | Text selector support          | ❌                      | ❌                | ❌                        | ✅                     |
-| Screenshot event generation    | ❌                      | ✅                | ❌                        | ❌                     |
+| Screenshot event generation    | ✅                      | ✅                | ❌                        | ❌                     |
 | Hover event generation         | ✅                      | ❌                | ❌                        | ❌                     |
 | Record from Chrome Stable      | ✅                      | ✅                | ❌                        | ❌                     |
 

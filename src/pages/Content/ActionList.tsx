@@ -78,6 +78,10 @@ function ActionListItem({
             X:{action.deltaX}, Y:{action.deltaY}
           </span>
         </>
+      ) : action.type === 'fullScreenshot' ? (
+        <>
+          <span className="em-text">Take full page screenshot</span>
+        </>
       ) : (
         <></>
       )}
@@ -89,7 +93,7 @@ export default function ActionList({ actions }: { actions: Action[] }) {
   return (
     <>
       <style>{ActionListStyle}</style>
-      <div className="ActionList">
+      <div className="ActionList" data-testId="action-list">
         {actions
           .filter((action) =>
             [
@@ -100,6 +104,7 @@ export default function ActionList({ actions }: { actions: Action[] }) {
               'load',
               'resize',
               'wheel',
+              'fullScreenshot',
             ].includes(action.type)
           )
           .map((action, i) => (

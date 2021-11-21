@@ -77,6 +77,10 @@ ${lines}
       deltaY
     )});`;
   }
+
+  fullScreenshot() {
+    return `await page.screenshot({ path: 'screenshot.png', fullPage: true });`;
+  }
 }
 
 class PuppeteerScriptBuilder {
@@ -159,6 +163,10 @@ ${lines}
   wheel(deltaX: number, deltaY: number) {
     return `await page.evaluate(() => window.scrollBy(${deltaX}, ${deltaY}));`;
   }
+
+  fullScreenshot() {
+    return `await page.screenshot({ path: 'screenshot.png', fullPage: true });`;
+  }
 }
 
 function describeAction(action: Action) {
@@ -192,6 +200,8 @@ function describeAction(action: Action) {
     ? `Resize window to ${action.width} x ${action.height}`
     : action.type === 'wheel'
     ? `Scroll wheel by X:${action.deltaX}, Y:${action.deltaY}`
+    : action.type === 'fullScreenshot'
+    ? `Take full page screenshot`
     : '';
 }
 
@@ -255,6 +265,8 @@ export function genCode(
       line += scriptBuilder.resize(action.width, action.height);
     } else if (action.type === 'wheel') {
       line += scriptBuilder.wheel(action.deltaX, action.deltaY);
+    } else if (action.type === 'fullScreenshot') {
+      line += scriptBuilder.fullScreenshot();
     } else {
       return null;
     }
