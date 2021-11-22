@@ -1761,6 +1761,11 @@
   resolved "https://registry.yarnpkg.com/@types/filewriter/-/filewriter-0.0.29.tgz#a48795ecadf957f6c0d10e0c34af86c098fa5bee"
   integrity sha512-BsPXH/irW0ht0Ji6iw/jJaK8Lj3FJemon2gvEqHKpCdDCeemHa+rI3WBGq5z7cDMZgoLjY40oninGxqk+8NzNQ==
 
+"@types/firefox@^0.0.31":
+  version "0.0.31"
+  resolved "https://registry.yarnpkg.com/@types/firefox/-/firefox-0.0.31.tgz#badc22a9658955b1ccd398697b9c4556f7d977b7"
+  integrity sha512-GFamkvAUHpv41OvKSCbFX8HVqIFr8wIWhrUzD/7weQv4dFAdxoZfTj0mB+DJtxTlnw3oJyp1ZNt69TL4PP7ZMg==
+
 "@types/glob@^7.1.1":
   version "7.1.4"
   resolved "https://registry.yarnpkg.com/@types/glob/-/glob-7.1.4.tgz#ea59e21d2ee5c517914cb4bc8e4153b99e566672"

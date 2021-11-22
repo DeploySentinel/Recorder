@@ -12,16 +12,16 @@ import {
 import Logo from '../Common/Logo';
 import CodeGen, { genCode } from '../Content/CodeGen';
 import ActionList from '../Content/ActionList';
-import { setEndRecordingStorage, localStorageGet } from '../Common/utils';
+import {
+  setEndRecordingStorage,
+  localStorageGet,
+  getCurrentTab,
+  executeScript,
+  executeCleanUp,
+} from '../Common/utils';
 
 import PopupStyle from './Popup.css';
 import type { Action } from '../Content/recorder';
-
-async function getCurrentTab() {
-  let queryOptions = { active: true, currentWindow: true };
-  let [tab] = await chrome.tabs.query(queryOptions);
-  return tab;
-}
 
 function LastStepPanel({
   actions,
@@ -135,10 +135,16 @@ const Popup = () => {
     });
 
     chrome.storage.onChanged.addListener((changes) => {
-      if (changes.recordingTabId != null) {
+      if (
+        changes.recordingTabId != null &&
+        changes.recordingTabId.newValue != changes.recordingTabId.oldValue
+      ) {
         setRecordingTabId(changes.recordingTabId.newValue);
       }
-      if (changes.recording != null) {
+      if (
+        changes.recording != null &&
+        changes.recording.newValue != changes.recording.oldValue
+      ) {
         setActions(changes.recording.newValue);
       }
     });
@@ -165,19 +171,8 @@ const Popup = () => {
       ],
     });
 
-    // Clean up existing instance in the tab if it exists
-    await chrome.scripting.executeScript({
-      target: { tabId },
-      func: () => {
-        if (typeof window?.__DEPLOYSENTINEL_CLEAN_UP === 'function') {
-          window.__DEPLOYSENTINEL_CLEAN_UP();
-        }
-      },
-    });
-    chrome.scripting.executeScript({
-      target: { tabId },
-      files: ['contentScript.bundle.js'],
-    });
+    await executeCleanUp(tabId);
+    await executeScript(tabId, 'contentScript.bundle.js');
 
     window.close();
   };
@@ -209,6 +204,7 @@ const Popup = () => {
                     className="link-button"
                     onClick={() => {
                       chrome.tabs.update(recordingTabId, { active: true });
+                      window.close();
                     }}
                   >
                     Go To Active Recording Tab

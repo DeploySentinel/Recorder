@@ -11,7 +11,11 @@ declare global {
   interface Window {
     __DEPLOYSENTINEL_CLEAN_UP: () => void;
     __DEPLOYSENTINEL_SCRIPT: boolean | null;
+    wrappedJSObject: {
+      __DEPLOYSENTINEL_SCRIPT: boolean;
+    };
   }
+  function exportFunction(fn: Function, scope: Window, opts: any): void;
 }
 
 // Expose a clean up function after a test completes
@@ -20,11 +24,20 @@ function cleanUp() {
   // @ts-ignore - the typing doesn't like shadow roots for some reason
   unmountComponentAtNode(target.shadowRoot);
 }
+
+// Expose clean up to window
 window.__DEPLOYSENTINEL_CLEAN_UP = cleanUp;
+// For firefox
+if (typeof exportFunction === 'function') {
+  exportFunction(cleanUp, window, { defineAs: '__DEPLOYSENTINEL_CLEAN_UP' });
+}
 
 if (window.__DEPLOYSENTINEL_SCRIPT == null) {
-  // Mark that we've loaded into this tab so injecting the script again doesn't trigger everything
   window.__DEPLOYSENTINEL_SCRIPT = true;
+  // For firefox
+  if (window.wrappedJSObject != null) {
+    window.wrappedJSObject.__DEPLOYSENTINEL_SCRIPT = true;
+  }
 
   target.attachShadow({ mode: 'open' });
   render(

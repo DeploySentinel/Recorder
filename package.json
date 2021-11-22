@@ -1,11 +1,13 @@
 {
   "name": "deploysentinel-recorder",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "A Chrome Extension that generates Playwright and Puppeteer scripts automatically from your browser interactions.",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "node utils/build.js && zip -r build.zip build",
-    "start": "node utils/webserver.js",
+    "build-chrome": "MANIFEST_VERSION=3 node utils/build.js && zip -r build_chrome.zip build",
+    "build-ff": "MANIFEST_VERSION=2 node utils/build.js && zip -r build_ff.zip build",
+    "start-chrome": "MANIFEST_VERSION=3 node utils/webserver.js",
+    "start-ff": "MANIFEST_VERSION=2 node utils/webserver.js",
     "test": "jest"
   },
   "dependencies": {
@@ -15,6 +17,7 @@
     "@hot-loader/react-dom": "^17.0.1",
     "@medv/finder": "^2.0.0",
     "@types/chrome": "^0.0.154",
+    "@types/firefox": "^0.0.31",
     "@types/lodash.debounce": "^4.0.6",
     "@types/react": "^17.0.2",
     "@types/react-copy-to-clipboard": "^5.0.1",

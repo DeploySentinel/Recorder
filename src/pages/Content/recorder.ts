@@ -145,7 +145,10 @@ class Recorder {
 
       // Watch for changes to the recording from the background worker (when a SPA navigation happens)
       chrome.storage.onChanged.addListener((changes) => {
-        if (changes.recording != null) {
+        if (
+          changes.recording != null &&
+          changes.recording.newValue != changes.recording.oldValue
+        ) {
           this._recording = changes.recording.newValue;
         }
       });

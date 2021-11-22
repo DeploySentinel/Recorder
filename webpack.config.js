@@ -8,6 +8,7 @@ var webpack = require('webpack'),
   TerserPlugin = require('terser-webpack-plugin');
 
 const ASSET_PATH = process.env.ASSET_PATH || '/';
+const MANIFEST_VERSION = process.env.MANIFEST_VERSION;
 
 var alias = {
   'react-dom': '@hot-loader/react-dom',
@@ -53,7 +54,6 @@ var options = {
       {
         // Content script styles need to be embedded inline due to shadow dom usage
         test: /\.(css|scss)$/,
-        // include: [ContentScriptPath, FaStylePath],
         type: 'asset/source',
       },
       {
@@ -102,8 +102,8 @@ var options = {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: 'src/manifest.json',
-          to: path.join(__dirname, 'build'),
+          from: `src/manifest${MANIFEST_VERSION}.json`,
+          to: path.join(__dirname, 'build', 'manifest.json'),
           force: true,
           transform: function (content, path) {
             // generates the manifest file using the package.json informations

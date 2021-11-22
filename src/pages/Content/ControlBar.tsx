@@ -106,6 +106,7 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
   const [showActionsMode, setShowActionsMode] = useState<
     'actions' | 'playwright' | 'puppeteer'
   >('playwright');
+
   const [copyCodeConfirm, setCopyCodeConfirm] = useState<boolean>(false);
   const [screenshotConfirm, setScreenshotConfirm] = useState<boolean>(false);
 
@@ -174,7 +175,9 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
     chrome.storage.onChanged.addListener((changes) => {
       if (
         changes.recordingState != null &&
-        changes.recordingState.newValue === 'finished'
+        changes.recordingState.newValue === 'finished' &&
+        // Firefox will fire change events even if the values are not changed
+        changes.recordingState.newValue !== changes.recordingState.oldValue
       ) {
         if (!isFinished) {
           onEndRecording();
@@ -298,25 +301,27 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
                 >
                   Show {showActionsMode === 'actions' ? 'Code' : 'Actions'}
                 </span>
-                <span
-                  className={`text-sm link-button mr-2 ${
-                    screenshotConfirm ? 'text-green' : ''
-                  }`}
-                  data-testid="record-screenshot"
-                  onClick={() => {
-                    recorderRef.current?.onFullScreenshot();
-                    setScreenshotConfirm(true);
-                    setTimeout(() => {
-                      setScreenshotConfirm(false);
-                    }, 2000);
-                  }}
-                >
-                  <FontAwesomeIcon
-                    icon={screenshotConfirm ? faCheck : faCamera}
-                    size="sm"
-                  />{' '}
-                  Record Screenshot
-                </span>
+                {!isFinished && (
+                  <span
+                    className={`text-sm link-button mr-2 ${
+                      screenshotConfirm ? 'text-green' : ''
+                    }`}
+                    data-testid="record-screenshot"
+                    onClick={() => {
+                      recorderRef.current?.onFullScreenshot();
+                      setScreenshotConfirm(true);
+                      setTimeout(() => {
+                        setScreenshotConfirm(false);
+                      }, 2000);
+                    }}
+                  >
+                    <FontAwesomeIcon
+                      icon={screenshotConfirm ? faCheck : faCamera}
+                      size="sm"
+                    />{' '}
+                    Record Screenshot
+                  </span>
+                )}
               </div>
               <div>
                 {(showActionsMode === 'playwright' ||

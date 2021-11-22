@@ -1,13 +1,10 @@
-import { setEndRecordingStorage, localStorageGet } from '../Common/utils';
+import {
+  setEndRecordingStorage,
+  localStorageGet,
+  executeScript,
+} from '../Common/utils';
 
 const CTX_MENU_ID = 'deploysentinel-menu-id';
-
-function injectContentScript(tabId: number) {
-  chrome.scripting.executeScript({
-    target: { tabId },
-    files: ['contentScript.bundle.js'],
-  });
-}
 
 async function recordNavigationEvent(
   url: string,
@@ -86,7 +83,7 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
     return;
   }
 
-  injectContentScript(tabId);
+  executeScript(tabId, 'contentScript.bundle.js');
 });
 
 chrome.contextMenus.removeAll();
@@ -121,6 +118,10 @@ localStorageGet(['recordingState']).then(({ recordingState }) => {
 });
 
 chrome.storage.onChanged.addListener((changes) => {
+  if (changes?.recordingState?.oldValue === changes?.recordingState?.newValue) {
+    return;
+  }
+
   if (changes?.recordingState?.newValue == 'active') {
     chrome.contextMenus.update(CTX_MENU_ID, {
       enabled: true,

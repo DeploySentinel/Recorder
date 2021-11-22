@@ -294,7 +294,7 @@ export default function CodeGen({
       customStyle={{
         background: 'none',
         padding: 0,
-        overflow: 'overlay',
+        overflow: 'auto',
         paddingRight: '1em',
         paddingBottom: '1em',
         ...(styles || {}),
