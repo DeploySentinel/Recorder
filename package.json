@@ -4,10 +4,11 @@
   "description": "A Chrome Extension that generates Playwright and Puppeteer scripts automatically from your browser interactions.",
   "license": "Apache-2.0",
   "scripts": {
-    "build-chrome": "MANIFEST_VERSION=3 node utils/build.js && zip -r build_chrome.zip build",
-    "build-ff": "MANIFEST_VERSION=2 node utils/build.js && zip -r build_ff.zip build",
+    "build-chrome": "MANIFEST_VERSION=3 node utils/build.js && rm -f build/.DS_Store && zip -r build_chrome.zip build",
+    "build-ff": "MANIFEST_VERSION=2 node utils/build.js && rm -f build/.DS_Store && zip -jr build_ff.zip build",
     "start-chrome": "MANIFEST_VERSION=3 node utils/webserver.js",
     "start-ff": "MANIFEST_VERSION=2 node utils/webserver.js",
+    "bundle-source": "zip source.zip -r ./* -x ./node_modules/\\* -x .git/\\* -x .vscode/\\* -x \\*.log",
     "test": "jest"
   },
   "dependencies": {
