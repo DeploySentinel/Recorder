@@ -1,5 +1,8 @@
 # DeploySentinel Recorder
 
+![Chrome Web Store](https://img.shields.io/chrome-web-store/rating/geggbdbnidkhbnbjoganapfhkpgkndfo?color=8F57F3&label=Chrome%20Rating)
+![Tests](https://github.com/DeploySentinel/Recorder/actions/workflows/main.yml/badge.svg)
+
 A Chrome Extension that generates Playwright and Puppeteer scripts automatically
 from your browser interactions.
 
