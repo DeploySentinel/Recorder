@@ -19,4 +19,5 @@
 secrets.*.js
 
 **/*.zip
+**/*.log
 **/.vscode

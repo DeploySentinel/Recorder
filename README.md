@@ -3,14 +3,15 @@
 ![Chrome Web Store](https://img.shields.io/chrome-web-store/rating/geggbdbnidkhbnbjoganapfhkpgkndfo?color=8F57F3&label=Chrome%20Rating)
 ![Tests](https://github.com/DeploySentinel/Recorder/actions/workflows/main.yml/badge.svg)
 
-A Chrome Extension that generates Playwright and Puppeteer scripts automatically
-from your browser interactions.
+A Browser Extension that generates Playwright and Puppeteer scripts
+automatically from your browser interactions.
 
 Simply step through your website while recording with DeploySentinel Recorder
 and the extension will convert the captured user flow into a Playwright or
 Puppeteer script.
 
 [![Chrome Store Icon](assets/ChromeStoreIcon.png)](https://chrome.google.com/webstore/detail/deploysentinel-recorder/geggbdbnidkhbnbjoganapfhkpgkndfo)
+[![Firefox Addon Icon](assets/FirefoxAddonIcon.png)](https://addons.mozilla.org/en-US/firefox/addon/deploysentinel-recorder/)
 
 # Demo
 
@@ -65,10 +66,20 @@ feel free to open an issue or PR for what you think is missing.
 
 # Development Instructions
 
-Install Dependencies: `yarn`
+Install Dependencies: `yarn` (or `yarn --frozen-lockfile`)
 
-Start Local Webpack Dev Server: `yarn run start`
+## Firefox
 
-Build Compressed Chrome Extension: `yarn run build`
+Start Local Webpack Dev Server for Firefox: `yarn run start-ff`
+
+Compressed Firefox Extension: `yarn run build-ff`
+
+Bundle source files for review: `yarn run bundle-source`
+
+## Chrome
+
+Start Local Webpack Dev Server for Chrome: `yarn run start-chrome`
+
+Compressed Chrome Extension: `yarn run build-chrome`
 
 Run E2E Tests: `yarn test`
