@@ -190,6 +190,7 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
   const displayedSelector = getBestSelectorForAction({
     type: 'click',
     tagName: hoveredElement?.tagName ?? '',
+    inputType: undefined,
     value: undefined,
     selectors: hoveredElementSelectors || {},
     timestamp: 0,

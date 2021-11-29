@@ -5,6 +5,7 @@ import debounce from 'lodash.debounce';
 type BaseAction = {
   type: string;
   tagName: string;
+  inputType: string | undefined;
   value: string | undefined;
   selectors: { [key: string]: string | null };
   timestamp: number;
@@ -79,6 +80,7 @@ function buildBaseAction(event: Event): BaseAction {
       target.type.toLowerCase() === 'password',
     type: event.type,
     tagName: target.tagName,
+    inputType: target instanceof HTMLInputElement ? target.type : undefined,
     selectors: genSelectors(target) ?? {},
     timestamp: event.timeStamp,
     value: undefined,

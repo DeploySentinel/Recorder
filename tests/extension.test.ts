@@ -131,7 +131,7 @@ test('can click through recording steps and it generates the right code', async 
     expect.stringContaining("page.click('#searchInput');")
   );
   expect(content).toEqual(
-    expect.stringContaining("page.type('#searchInput', 'tacos');")
+    expect.stringContaining("page.fill('#searchInput', 'tacos');")
   );
   expect(content).toEqual(
     expect.stringContaining("page.press('#searchInput', 'Enter'),")

@@ -51,7 +51,14 @@ ${lines}
     return `await page.setViewportSize({ width: ${width}, height: ${height} });`;
   }
 
-  input(selector: string, value: string, causesNavigation: boolean) {
+  fill(selector: string, value: string, causesNavigation: boolean) {
+    const actionStr = `page.fill('${selector}', '${value}')`;
+    return causesNavigation
+      ? this.waitForActionAndNavigation(actionStr)
+      : `await ${actionStr};`;
+  }
+
+  type(selector: string, value: string, causesNavigation: boolean) {
     const actionStr = `page.type('${selector}', '${value}')`;
     return causesNavigation
       ? this.waitForActionAndNavigation(actionStr)
@@ -134,12 +141,27 @@ ${lines}
     return `await page.setViewport({ width: ${width}, height: ${height} });`;
   }
 
-  input(selector: string, value: string, causesNavigation: boolean) {
+  type(selector: string, value: string, causesNavigation: boolean) {
     const pageType = `page.type('${selector}', '${value}')`;
     if (causesNavigation) {
       return this.waitForSelectorAndNavigation(selector, pageType);
     }
     return `await ${this.waitForSelector(selector)};\n  await ${pageType};`;
+  }
+
+  // Puppeteer doesn't support `fill` so we'll do our own actionability checks
+  // but still type
+  fill(selector: string, value: string, causesNavigation: boolean) {
+    const pageType = `page.type('${selector}', '${value}')`;
+    if (causesNavigation) {
+      return this.waitForSelectorAndNavigation(
+        `${selector}:not([disabled])`,
+        pageType
+      );
+    }
+    return `await ${this.waitForSelector(
+      `${selector}:not([disabled])`
+    )};\n  await ${pageType};`;
   }
 
   select(selector: string, option: string, causesNavigation: boolean) {
@@ -205,6 +227,23 @@ function describeAction(action: Action) {
     : '';
 }
 
+const fillableInputTypes = new Set([
+  '',
+  'email',
+  'number',
+  'password',
+  'search',
+  'tel',
+  'text',
+  'url',
+  'date',
+  'time',
+  'datetime',
+  'datetime-local',
+  'month',
+  'week',
+]);
+
 export function genCode(
   actions: Action[],
   showComments: boolean = true,
@@ -251,8 +290,21 @@ export function genCode(
             action.value ?? '',
             causesNavigation
           );
+        } else if (
+          // If the input is "fillable" or a text area
+          (action.tagName === 'INPUT' &&
+            action.inputType != null &&
+            fillableInputTypes.has(action.inputType)) ||
+          action.tagName === 'TEXTAREA'
+        ) {
+          // Do more actionability checks
+          line += scriptBuilder.fill(
+            bestSelector,
+            action.value ?? '',
+            causesNavigation
+          );
         } else {
-          line += scriptBuilder.input(
+          line += scriptBuilder.type(
             bestSelector,
             action.value ?? '',
             causesNavigation
