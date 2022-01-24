@@ -2,7 +2,42 @@ export function setEndRecordingStorage() {
   chrome.storage.local.set({
     recordingState: 'finished',
     recordingTabId: null,
+    returnTabId: null,
   });
+}
+
+export function setStartRecordingStorage(
+  tabId: number,
+  newUrl: string,
+  returnTabId?: number
+) {
+  const storage = {
+    recordingState: 'active',
+    recordingTabId: tabId,
+    recording: [
+      {
+        type: 'load',
+        url: newUrl,
+      },
+    ],
+    ...(returnTabId != null
+      ? {
+          returnTabId,
+        }
+      : {}),
+  };
+  chrome.storage.local.set(storage);
+}
+
+export async function createTab(url: string) {
+  // This is because we're straddling v2 and v3 manifest
+  const api = typeof browser === 'object' ? browser : chrome;
+
+  const tab = await api.tabs.create({
+    url,
+  });
+
+  return tab;
 }
 
 export function localStorageGet(keys: string[]) {

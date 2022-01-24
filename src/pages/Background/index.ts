@@ -1,7 +1,9 @@
 import {
   setEndRecordingStorage,
+  setStartRecordingStorage,
   localStorageGet,
   executeScript,
+  createTab,
 } from '../Common/utils';
 
 const CTX_MENU_ID = 'deploysentinel-menu-id';
@@ -55,6 +57,35 @@ async function onNavEvent(
     recording
   );
 }
+
+chrome.runtime.onMessage.addListener(async function (
+  request,
+  sender,
+  sendResponse
+) {
+  if (request.type === 'start-recording') {
+    const testEditorTabId = sender.tab?.id;
+
+    const newUrl = request.url;
+    const newTab = await createTab(newUrl);
+    const tabId = newTab.id;
+
+    if (tabId == null) {
+      throw new Error('New tab id not defined');
+    }
+
+    setStartRecordingStorage(tabId, newUrl, testEditorTabId);
+  } else if (request.type === 'forward-recording') {
+    // Focus the original deploysentinel webapp tab post-recording
+    chrome.tabs.update(request.tabId, { active: true });
+
+    chrome.tabs.sendMessage(request.tabId, {
+      type: 'playwright-test-recording',
+      code: request.code,
+      actions: request.actions,
+    });
+  }
+});
 
 // Set recording as ended when the recording tab is closed
 chrome.tabs.onRemoved.addListener(async (tabId) => {

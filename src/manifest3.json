@@ -21,5 +21,15 @@
   "host_permissions": ["<all_urls>"],
   "externally_connectable": {
     "matches": ["https://*.deploysentinel.com/*"]
-  }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.deploysentinel.com/*"],
+      "js": ["bridge.bundle.js"]
+    },
+    {
+      "matches": ["http://localhost:8080/*"],
+      "js": ["bridge.bundle.js"]
+    }
+  ]
 }

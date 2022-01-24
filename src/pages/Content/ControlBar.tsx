@@ -22,6 +22,7 @@ import CodeGen, { genCode } from './CodeGen';
 import type { Action } from './recorder';
 
 import ControlBarStyle from './ControlBar.css';
+import { endRecording } from '../Common/endRecording';
 
 const ActionButton = ({
   onClick,
@@ -130,10 +131,8 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
 
     // Turn off recorder
     recorderRef.current?.deregister();
-    chrome.storage.local.set({
-      recordingState: 'finished',
-      recordingTabId: null,
-    });
+
+    endRecording();
   };
 
   const onClose = () => {

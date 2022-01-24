@@ -13,7 +13,7 @@ import Logo from '../Common/Logo';
 import CodeGen, { genCode } from '../Content/CodeGen';
 import ActionList from '../Content/ActionList';
 import {
-  setEndRecordingStorage,
+  setStartRecordingStorage,
   localStorageGet,
   getCurrentTab,
   executeScript,
@@ -22,6 +22,7 @@ import {
 
 import PopupStyle from './Popup.css';
 import type { Action } from '../Content/recorder';
+import { endRecording } from '../Common/endRecording';
 
 function LastStepPanel({
   actions,
@@ -160,16 +161,7 @@ const Popup = () => {
 
     // Let everyone know we should be recording with this current tab
     // Clear out event buffer
-    chrome.storage.local.set({
-      recordingState: 'active',
-      recordingTabId: tabId,
-      recording: [
-        {
-          type: 'load',
-          url: currentTab.url,
-        },
-      ],
-    });
+    setStartRecordingStorage(tabId, currentTab.url || '');
 
     await executeCleanUp(tabId);
     await executeScript(tabId, 'contentScript.bundle.js');
@@ -214,7 +206,7 @@ const Popup = () => {
               <button
                 className="btn-primary-outline m-4"
                 style={{ marginTop: '2em' }}
-                onClick={() => setEndRecordingStorage()}
+                onClick={() => endRecording()}
                 data-testid="end-test-recording"
               >
                 <FontAwesomeIcon className="mr-1" icon={faSquare} />

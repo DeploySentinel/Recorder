@@ -19,5 +19,15 @@
     "contextMenus",
     "webNavigation",
     "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://*.deploysentinel.com/*"],
+      "js": ["bridge.bundle.js"]
+    },
+    {
+      "matches": ["http://localhost:8080/*"],
+      "js": ["bridge.bundle.js"]
+    }
   ]
 }
