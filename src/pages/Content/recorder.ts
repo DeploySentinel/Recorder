@@ -71,8 +71,11 @@ function _shouldGenerateKeyPressFor(event: KeyboardEvent): boolean {
   return true;
 }
 
-function buildBaseAction(event: Event): BaseAction {
-  const target = event.target as HTMLElement;
+function buildBaseAction(
+  event: Event,
+  overrideTarget?: HTMLElement
+): BaseAction {
+  const target = overrideTarget ?? (event.target as HTMLElement);
 
   return {
     isPassword:
@@ -155,10 +158,7 @@ class Recorder {
         }
       });
 
-      // Omitting change and submit events
-      ['click'].map((eventName) => {
-        window.addEventListener(eventName, this.listener, true);
-      });
+      window.addEventListener('click', this.onClick, true);
       window.addEventListener('keydown', this.onKeyDown, true);
       window.addEventListener('input', this.onInput, true);
       window.addEventListener('resize', this.debouncedOnResize, true);
@@ -181,9 +181,7 @@ class Recorder {
   }
 
   deregister() {
-    ['click', 'change', 'submit'].map((eventName) => {
-      window.removeEventListener(eventName, this.listener, true);
-    });
+    window.removeEventListener('click', this.onClick, true);
     window.removeEventListener('keydown', this.onKeyDown, true);
     window.removeEventListener('input', this.onInput, true);
     window.removeEventListener('resize', this.debouncedOnResize, true);
@@ -216,6 +214,29 @@ class Recorder {
       };
       this.appendToRecording(action);
     }
+  };
+
+  private onClick = (event: Event) => {
+    if (isEventFromOverlay(event)) {
+      return;
+    }
+    if (this.checkAndSetDuplicateEventHandle(event)) {
+      return;
+    }
+
+    const target = event.target as HTMLElement;
+
+    // Choose the parent element if it's a link, since we probably want the link
+    const { parentElement } = target;
+    const predictedTarget =
+      parentElement?.tagName === 'A' ? parentElement : target;
+
+    const action = {
+      ...buildBaseAction(event, predictedTarget),
+    };
+
+    // @ts-ignore
+    this.appendToRecording(action);
   };
 
   private onKeyDown = (event: KeyboardEvent) => {

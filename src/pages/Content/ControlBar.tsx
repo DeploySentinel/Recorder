@@ -147,8 +147,12 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
         elementMouseIsOver = document.elementFromPoint(x, y) as HTMLElement;
 
       if (!isElementFromOverlay(elementMouseIsOver)) {
-        setHoveredElement(elementMouseIsOver || null);
-        setHoveredElementSelectors(genSelectors(elementMouseIsOver));
+        const { parentElement } = elementMouseIsOver;
+        // Match the logic in recorder.ts for link clicks
+        const element =
+          parentElement?.tagName === 'A' ? parentElement : elementMouseIsOver;
+        setHoveredElement(element || null);
+        setHoveredElementSelectors(genSelectors(element));
       }
     }, 100);
 
