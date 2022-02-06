@@ -217,6 +217,10 @@ class Recorder {
   };
 
   private onClick = (event: Event) => {
+    if (event.isTrusted === false) {
+      // Ignore synthetic events
+      return;
+    }
     if (isEventFromOverlay(event)) {
       return;
     }
