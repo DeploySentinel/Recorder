@@ -321,28 +321,6 @@ class Recorder {
     }
   };
 
-  private listener = (event: Event) => {
-    if (isEventFromOverlay(event)) {
-      return;
-    }
-    if (this.checkAndSetDuplicateEventHandle(event)) {
-      return;
-    }
-
-    const target = event.target as HTMLElement;
-    const action = {
-      type: event.type,
-      tagName: target.tagName,
-      // @ts-ignore
-      value: target?.value,
-      selectors: genSelectors(target),
-      timestamp: event.timeStamp,
-    };
-
-    // @ts-ignore
-    this.appendToRecording(action);
-  };
-
   private onResize = () => {
     const lastResizeAction = this.getLastResizeAction();
     const { innerWidth: width, innerHeight: height } = window;
