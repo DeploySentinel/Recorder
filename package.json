@@ -1,6 +1,6 @@
 {
   "name": "deploysentinel-recorder",
-  "version": "0.3.0",
+  "version": "0.5.0",
   "description": "A Chrome Extension that generates Playwright and Puppeteer scripts automatically from your browser interactions.",
   "license": "Apache-2.0",
   "scripts": {
