@@ -82,6 +82,11 @@ function ActionListItem({
         <>
           <span className="em-text">Take full page screenshot</span>
         </>
+      ) : action.type === 'awaitText' ? (
+        <>
+          <span className="em-text">Wait for text</span>
+          <span>"{action.text}"</span>
+        </>
       ) : (
         <></>
       )}
@@ -105,6 +110,7 @@ export default function ActionList({ actions }: { actions: Action[] }) {
               'resize',
               'wheel',
               'fullScreenshot',
+              'awaitText',
             ].includes(action.type)
           )
           .map((action, i) => (

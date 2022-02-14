@@ -82,6 +82,8 @@ function RenderActionText({ action }: { action: Action }) {
         ? `Scroll wheel by X:${action.deltaX}, Y:${action.deltaY}`
         : action.type === 'fullScreenshot'
         ? `Take full page screenshot`
+        : action.type === 'awaitText'
+        ? `Wait for text "${action.text}"`
         : ''}
     </>
   );

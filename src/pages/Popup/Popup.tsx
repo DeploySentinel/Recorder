@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faSquare,
   faCircle,
+  faInfoCircle,
   faCopy,
   faCheck,
   faChevronLeft,
@@ -122,6 +123,10 @@ const Popup = () => {
 
   const [isShowingLastTest, setIsShowingLastTest] = useState<boolean>(false);
 
+  const [showBetaCTA, setShowBetaCTA] = useState<boolean>(
+    localStorage.getItem('showBetaCta') !== 'false'
+  );
+
   useEffect(() => {
     localStorageGet(['recording', 'recordingTabId']).then(
       ({ recording, recordingTabId }) => {
@@ -217,7 +222,18 @@ const Popup = () => {
         )}
         {activePage === 'home' && (
           <>
-            <Logo />
+            <div className="d-flex justify-between items-center">
+              <Logo />
+              <div>
+                <a
+                  href="https://www.deploysentinel.com/docs/recorder"
+                  target="_blank"
+                  className="text-button text-decoration-none text-sm text-grey"
+                >
+                  <FontAwesomeIcon icon={faInfoCircle} className="mr-1" /> Docs
+                </a>
+              </div>
+            </div>
             <div className="text-center mt-12">
               <div
                 style={{
@@ -226,8 +242,8 @@ const Popup = () => {
                 }}
                 className="text-grey mt-6"
               >
-                Generate a Playwright/Puppeteer test by just interacting with a
-                site.
+                Generate Playwright & Puppeteer scripts from your browser
+                actions (ex. click, type, scroll).
               </div>
               <button
                 className="btn-primary mt-8"
@@ -239,7 +255,7 @@ const Popup = () => {
                   style={{ color: '#EA4240' }}
                   icon={faCircle}
                 />
-                &nbsp; Record a New Test
+                &nbsp; Start Recording from Current Tab
               </button>
               <div className="my-8">
                 <span
@@ -249,9 +265,42 @@ const Popup = () => {
                   }}
                   data-testid="view-last-test"
                 >
-                  View Last Test Steps & Code
+                  View Last Recording
                 </span>
               </div>
+              {showBetaCTA && (
+                <div
+                  style={{ background: '#2e273b' }}
+                  className="rounded p-3 text-left mt-12"
+                >
+                  <div className="fw-bold">
+                    Join the free DeploySentinel Beta
+                  </div>
+                  <div className="mt-4" style={{ lineHeight: '1.5rem' }}>
+                    Monitor your site 24/7 and get alerted on issues by
+                    deploying Playwright tests on DeploySentinel.
+                  </div>
+                  <div className="mt-4">
+                    <a
+                      href="https://deploysentinel.com?utm_source=rcd&utm_medium=bnr"
+                      target="_blank"
+                      className="link-button text-decoration-none fw-bold mr-5"
+                    >
+                      Learn More
+                    </a>
+                    <span
+                      className="text-button text-grey"
+                      onClick={() => {
+                        localStorage?.setItem('showBetaCta', 'false');
+                        setShowBetaCTA(false);
+                      }}
+                      data-testid="view-last-test"
+                    >
+                      No Thanks
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </>
         )}

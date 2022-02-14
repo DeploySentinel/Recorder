@@ -38,7 +38,8 @@ export type Action =
     }
   | ResizeAction
   | { type: 'wheel'; deltaY: number; deltaX: number }
-  | { type: 'fullScreenshot' };
+  | { type: 'fullScreenshot' }
+  | (BaseAction & { type: 'awaitText'; text: string });
 
 function isEventFromOverlay(event: Event) {
   return (
@@ -165,7 +166,7 @@ class Recorder {
       window.addEventListener('wheel', this.onMouseWheel, true);
       window.addEventListener('contextmenu', this.onContextMenu, true);
       // We listen to a context menu action
-      chrome.runtime.onMessage.addListener(this.onHover);
+      chrome.runtime.onMessage.addListener(this.onBackgroundMessage);
 
       // Try capturing on start
       // Note: some browsers will fire 'resize' event on load
@@ -272,7 +273,7 @@ class Recorder {
     this.lastContextMenuEvent = event;
   };
 
-  private onHover = (request: any) => {
+  private onBackgroundMessage = (request: any) => {
     // Context menu was clicked, pull last context menu element
     if (
       request != null &&
@@ -282,6 +283,21 @@ class Recorder {
       const action = {
         ...buildBaseAction(this.lastContextMenuEvent),
         type: 'hover',
+        selectors: genSelectors(
+          this.lastContextMenuEvent.target as HTMLElement
+        ),
+      };
+      this.appendToRecording(action);
+    }
+    if (
+      request != null &&
+      request.type === 'onAwaitTextCtxMenu' &&
+      this.lastContextMenuEvent != null
+    ) {
+      const action = {
+        ...buildBaseAction(this.lastContextMenuEvent),
+        type: 'awaitText',
+        text: request.selectionText,
         selectors: genSelectors(
           this.lastContextMenuEvent.target as HTMLElement
         ),

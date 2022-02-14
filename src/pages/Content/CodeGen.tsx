@@ -88,6 +88,10 @@ ${lines}
   fullScreenshot() {
     return `await page.screenshot({ path: 'screenshot.png', fullPage: true });`;
   }
+
+  awaitText(text: string) {
+    return `await page.waitForSelector('text=${text}')`;
+  }
 }
 
 class PuppeteerScriptBuilder {
@@ -189,23 +193,27 @@ ${lines}
   fullScreenshot() {
     return `await page.screenshot({ path: 'screenshot.png', fullPage: true });`;
   }
+
+  awaitText(text: string) {
+    return `await page.waitForFunction("document.body.innerText.includes('${text}')");`;
+  }
+}
+
+function truncateText(str: string, maxLen: number) {
+  return `${str.substring(0, maxLen)}${str.length > maxLen ? '...' : ''}`;
 }
 
 function describeAction(action: Action) {
   return action?.type === 'click'
     ? `Click on <${action.tagName.toLowerCase()}> ${
         action.selectors.text != null && action.selectors.text.length > 0
-          ? `"${action.selectors.text.replaceAll('\n', ' ').substring(0, 25)}${
-              action.selectors.text.length > 25 ? '...' : ''
-            }"`
+          ? `"${truncateText(action.selectors.text.replace('\n', ' '), 25)}"`
           : getBestSelectorForAction(action)
       }`
     : action?.type === 'hover'
     ? `Hover over <${action.tagName.toLowerCase()}> ${
         action.selectors.text != null && action.selectors.text.length > 0
-          ? `"${action.selectors.text.replaceAll('\n', ' ').substring(0, 25)}${
-              action.selectors.text.length > 25 ? '...' : ''
-            }"`
+          ? `"${truncateText(action.selectors.text.replace('\n', ' '), 25)}"`
           : getBestSelectorForAction(action)
       }`
     : action?.type === 'input'
@@ -224,6 +232,8 @@ function describeAction(action: Action) {
     ? `Scroll wheel by X:${action.deltaX}, Y:${action.deltaY}`
     : action.type === 'fullScreenshot'
     ? `Take full page screenshot`
+    : action.type === 'awaitText'
+    ? `Wait for text "${truncateText(action.text, 25)}" to appear`
     : '';
 }
 
@@ -319,6 +329,8 @@ export function genCode(
       line += scriptBuilder.wheel(action.deltaX, action.deltaY);
     } else if (action.type === 'fullScreenshot') {
       line += scriptBuilder.fullScreenshot();
+    } else if (action.type === 'awaitText') {
+      line += scriptBuilder.awaitText(action.text);
     } else {
       return null;
     }

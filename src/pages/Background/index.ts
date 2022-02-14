@@ -6,7 +6,8 @@ import {
   createTab,
 } from '../Common/utils';
 
-const CTX_MENU_ID = 'deploysentinel-menu-id';
+const HOVER_CTX_MENU_ID = 'deploysentinel-menu-id';
+const AWAIT_TEXT_CTX_MENU_ID = 'deploysentinel-menu-await-text-id';
 
 async function recordNavigationEvent(
   url: string,
@@ -121,7 +122,13 @@ chrome.contextMenus.removeAll();
 chrome.contextMenus.create({
   title: 'Record hover over element',
   contexts: ['all'],
-  id: CTX_MENU_ID,
+  id: HOVER_CTX_MENU_ID,
+  enabled: false,
+});
+chrome.contextMenus.create({
+  title: 'Assert/wait for selected text',
+  contexts: ['selection'],
+  id: AWAIT_TEXT_CTX_MENU_ID,
   enabled: false,
 });
 
@@ -133,18 +140,30 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (tab.id != recordingTabId) {
     return;
   }
-  chrome.tabs.sendMessage(recordingTabId, { type: 'onHoverCtxMenu' });
+  const type =
+    info.menuItemId === HOVER_CTX_MENU_ID
+      ? 'onHoverCtxMenu'
+      : 'onAwaitTextCtxMenu';
+  chrome.tabs.sendMessage(recordingTabId, {
+    type,
+    selectionText: info.selectionText,
+  });
 });
+
+function updateContextMenuItems({ enabled }: { enabled: boolean }) {
+  chrome.contextMenus.update(HOVER_CTX_MENU_ID, {
+    enabled,
+  });
+  chrome.contextMenus.update(AWAIT_TEXT_CTX_MENU_ID, {
+    enabled,
+  });
+}
 
 localStorageGet(['recordingState']).then(({ recordingState }) => {
   if (recordingState === 'active') {
-    chrome.contextMenus.update(CTX_MENU_ID, {
-      enabled: true,
-    });
+    updateContextMenuItems({ enabled: true });
   } else {
-    chrome.contextMenus.update(CTX_MENU_ID, {
-      enabled: false,
-    });
+    updateContextMenuItems({ enabled: false });
   }
 });
 
@@ -154,13 +173,9 @@ chrome.storage.onChanged.addListener((changes) => {
   }
 
   if (changes?.recordingState?.newValue == 'active') {
-    chrome.contextMenus.update(CTX_MENU_ID, {
-      enabled: true,
-    });
+    updateContextMenuItems({ enabled: true });
   }
   if (changes?.recordingState?.newValue == 'finished') {
-    chrome.contextMenus.update(CTX_MENU_ID, {
-      enabled: false,
-    });
+    updateContextMenuItems({ enabled: false });
   }
 });

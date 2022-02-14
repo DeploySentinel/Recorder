@@ -80,6 +80,9 @@
 .text-button:hover {
   color: rgba(255, 255, 255, 0.8);
 }
+.text-button.text-grey:hover {
+  color: rgba(255, 255, 255);
+}
 
 /* Flex Utilities */
 .d-flex {
@@ -106,6 +109,9 @@
 }
 .p-2 {
   padding: 0.5em;
+}
+.p-3 {
+  padding: 0.75em;
 }
 .p-4 {
   padding: 1em;
@@ -140,6 +146,9 @@
 .mr-4 {
   margin-right: 1em;
 }
+.mr-5 {
+  margin-right: 1.5em;
+}
 .mb-2 {
   margin-bottom: 0.5em;
 }
@@ -172,7 +181,19 @@
   color: #ff5d5b;
 }
 
+.text-left {
+  text-align: left;
+}
+
 /* Bold */
-.font-bold {
+.font-bold,
+.fw-bold {
   font-weight: 700;
+}
+
+.rounded {
+  border-radius: 5px !important;
+}
+.text-decoration-none {
+  text-decoration: none !important;
 }
