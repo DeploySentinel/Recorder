@@ -28,7 +28,7 @@
       "js": ["bridge.bundle.js"]
     },
     {
-      "matches": ["http://localhost:8080/*"],
+      "matches": ["http://localhost/*"],
       "js": ["bridge.bundle.js"]
     }
   ]
