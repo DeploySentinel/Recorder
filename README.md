@@ -19,31 +19,36 @@ Puppeteer script.
 
 # Features
 
-- Automatically capture clicks, keyboard inputs, window resizes, and scroll
+- 💻 Automatically capture clicks, keyboard inputs, window resizes, and scroll
   events.
-- Generate clean and commented scripts for both Playwright and Puppeteer.
-- Preview recording progress and copy generated scripts mid-test to clipboard.
-- Generate selectors using `id` and `class` as well as other HTML properties
-  (ex. `aria-label`, `alt`, `name`, `data-testid`)
-- Capture hover events via context menu option (right-click)
+- 🤖 Generate clean and commented scripts for both Playwright and Puppeteer.
+- 📋 Preview recording progress and copy generated scripts mid-test to
+  clipboard.
+- 📛 Generate element selectors using `id` and `class` as well as other HTML
+  properties (ex. `aria-label`, `alt`, `name`, `data-testid`)
+- 🖱 Capture hover events via context menu option (right-click)
+- ✅ Assert/wait for specific text to be visible on the page
+- 📸 Generate full page screenshot events
 
 # Getting Started
 
 1. Download the Extension
 2. Visit the site you want to start recording from
-3. Click the extension icon and click "Record a New Test"
+3. Click the extension icon and click "Start Recording from Current Tab"
 4. Use the site as you would normally (click links, fill forms, etc.)
 
    - Right-click an element and select "Record hover over element" to record a
      hover event over an element.
+   - Highlight any text on the page, right-click and select "DeploySentinel
+     Recorder" > "Assert/wait for selected text" to add a text-based assertion.
 
 5. Click "End Test" whenever you are done. You can copy the generated script via
    the recording overlay.
-6. Click the extension icon and select "View Last Test Steps & Code" to access
-   the last recorded test any time afterwards.
+6. Click the extension icon and select "View Last Recording" to access the last
+   recorded test any time afterwards.
 
-_Pro tip: To view captured steps or generated code mid-recording, click "See
-Prior Steps" in the recording overlay._
+_Pro tip: To view captured steps or generated code mid-recording, click "Show
+More" in the recording overlay._
 
 # Alternatives Comparison
 
@@ -59,10 +64,10 @@ feel free to open an issue or PR for what you think is missing.
 | Accessibility Selector Support | ✅                      | ❌                | ✅                        | ✅                     |
 | Copy Code to Clipboard         | ✅                      | ✅                | ❌                        | ✅                     |
 | data-testid Selector Support   | ✅                      | ✅                | ❌                        | ✅                     |
-| Text selector support          | ❌                      | ❌                | ❌                        | ✅                     |
+| Text selector support          | ⚠                       | ❌                | ❌                        | ✅                     |
 | Screenshot event generation    | ✅                      | ✅                | ❌                        | ❌                     |
 | Hover event generation         | ✅                      | ❌                | ❌                        | ❌                     |
-| Record from Chrome Stable      | ✅                      | ✅                | ❌                        | ❌                     |
+| Record from Chrome Stable      | ✅                      | ✅                | ✅                        | ❌                     |
 
 # Development Instructions
 
