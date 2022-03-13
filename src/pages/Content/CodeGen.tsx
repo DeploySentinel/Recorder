@@ -4,7 +4,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 import { getBestSelectorForAction } from './selector';
 
-import type { Action } from './recorder';
+import type { Action } from '../types';
 
 class PlaywrightScriptBuilder {
   fileTemplate(lines: string) {

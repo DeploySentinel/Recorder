@@ -22,7 +22,7 @@ import {
 } from '../Common/utils';
 
 import PopupStyle from './Popup.css';
-import type { Action } from '../Content/recorder';
+import type { Action } from '../types';
 import { endRecording } from '../Common/endRecording';
 
 function LastStepPanel({
