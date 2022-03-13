@@ -13,6 +13,7 @@ import {
 import Logo from '../Common/Logo';
 import CodeGen, { genCode } from '../Content/CodeGen';
 import ActionList from '../Content/ActionList';
+import { endRecording } from '../Common/endRecording';
 import {
   setStartRecordingStorage,
   localStorageGet,
@@ -21,9 +22,10 @@ import {
   executeCleanUp,
 } from '../Common/utils';
 
-import PopupStyle from './Popup.css';
 import type { Action } from '../types';
-import { endRecording } from '../Common/endRecording';
+import { ActionsMode } from '../types';
+
+import PopupStyle from './Popup.css';
 
 function LastStepPanel({
   actions,
@@ -32,9 +34,7 @@ function LastStepPanel({
   actions: Action[];
   onBack: () => void;
 }) {
-  const [showActionsMode, setShowActionsMode] = useState<
-    'actions' | 'playwright' | 'puppeteer'
-  >('playwright');
+  const [showActionsMode, setShowActionsMode] = useState<ActionsMode>(ActionsMode.Playwright);
   const [copyCodeConfirm, setCopyCodeConfirm] = useState<boolean>(false);
 
   return (
@@ -47,35 +47,35 @@ function LastStepPanel({
       <div className="d-flex justify-between mt-4 items-end text-sm">
         <div className="font-bold text-xl">
           Last Test{' '}
-          {showActionsMode === 'actions' ? 'Actions' : 'Generated Code'}
+          {showActionsMode === ActionsMode.Actions ? 'Actions' : 'Generated Code'}
         </div>
         <div>
           <span
             className="link-button"
             onClick={() => {
               setShowActionsMode(
-                showActionsMode === 'actions' ? 'playwright' : 'actions'
+                showActionsMode === ActionsMode.Actions ? ActionsMode.Playwright : ActionsMode.Actions
               );
             }}
           >
-            Show {showActionsMode === 'actions' ? 'Generated Code' : 'Actions'}
+            Show {showActionsMode === ActionsMode.Actions ? 'Generated Code' : 'Actions'}
           </span>
         </div>
       </div>
-      {(showActionsMode === 'playwright' ||
-        showActionsMode === 'puppeteer') && (
+      {(showActionsMode === ActionsMode.Playwright ||
+        showActionsMode === ActionsMode.Puppeteer) && (
         <div className="mt-4">
           <div className="d-flex justify-between items-end mb-4">
             <span
               className="text-sm link-button"
               onClick={() => {
                 setShowActionsMode(
-                  showActionsMode === 'playwright' ? 'puppeteer' : 'playwright'
+                  showActionsMode ===  ActionsMode.Playwright ? ActionsMode.Puppeteer : ActionsMode.Playwright
                 );
               }}
             >
               Switch to{' '}
-              {showActionsMode === 'playwright' ? 'Puppeteer' : 'Playwright'}
+              {showActionsMode === ActionsMode.Playwright ? 'Puppeteer' : 'Playwright'}
             </span>
             <CopyToClipboard
               text={genCode(actions, true, showActionsMode)}
@@ -106,7 +106,7 @@ function LastStepPanel({
           />
         </div>
       )}
-      {showActionsMode === 'actions' && (
+      {showActionsMode === ActionsMode.Actions && (
         <div className="mt-4">
           <ActionList actions={actions} />
         </div>
