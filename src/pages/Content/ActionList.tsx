@@ -3,7 +3,7 @@ import { getBestSelectorForAction } from './selector';
 
 import ActionListStyle from './ActionList.css';
 
-import type { Action } from './recorder';
+import type { Action } from '../types';
 
 function ActionListItem({
   action,

@@ -1,6 +1,6 @@
 import { finder } from '@medv/finder';
 
-import type { Action } from './recorder';
+import type { Action } from '../types';
 
 function genAttributeSet(element: HTMLElement, attributes: string[]) {
   return new Set(

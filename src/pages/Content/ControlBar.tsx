@@ -19,7 +19,8 @@ import Highlighter from './Highlighter';
 import ActionList from './ActionList';
 import CodeGen, { genCode } from './CodeGen';
 
-import type { Action } from './recorder';
+import type { Action } from '../types';
+import { ActionsMode } from '../types';
 
 import ControlBarStyle from './ControlBar.css';
 import { endRecording } from '../Common/endRecording';
@@ -106,9 +107,7 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
   const [actions, setActions] = useState<Action[]>([]);
 
   const [showAllActions, setShowAllActions] = useState<boolean>(false);
-  const [showActionsMode, setShowActionsMode] = useState<
-    'actions' | 'playwright' | 'puppeteer'
-  >('playwright');
+  const [showActionsMode, setShowActionsMode] = useState<ActionsMode>(ActionsMode.Playwright);
 
   const [copyCodeConfirm, setCopyCodeConfirm] = useState<boolean>(false);
   const [screenshotConfirm, setScreenshotConfirm] = useState<boolean>(false);
@@ -125,7 +124,7 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
 
     // Show Code
     setShowAllActions(true);
-    setShowActionsMode('playwright');
+    setShowActionsMode(ActionsMode.Playwright);
 
     // Clear out highlighter
     document.removeEventListener('mousemove', handleMouseMoveRef.current, true);
@@ -297,15 +296,15 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
                 <span
                   className="text-sm link-button mr-2"
                   data-testId={`show-${
-                    showActionsMode === 'actions' ? 'code' : 'actions'
+                    showActionsMode === ActionsMode.Actions ? ActionsMode.Code : ActionsMode.Actions
                   }`}
                   onClick={() => {
                     setShowActionsMode(
-                      showActionsMode === 'actions' ? 'playwright' : 'actions'
+                      showActionsMode === ActionsMode.Actions ? ActionsMode.Playwright : ActionsMode.Actions
                     );
                   }}
                 >
-                  Show {showActionsMode === 'actions' ? 'Code' : 'Actions'}
+                  Show {showActionsMode === ActionsMode.Actions ? 'Code' : 'Actions'}
                 </span>
                 {!isFinished && (
                   <span
@@ -330,23 +329,23 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
                 )}
               </div>
               <div>
-                {(showActionsMode === 'playwright' ||
-                  showActionsMode === 'puppeteer') && (
+                {(showActionsMode === ActionsMode.Playwright ||
+                  showActionsMode === ActionsMode.Puppeteer) && (
                   <>
                     <span
                       className="text-sm link-button mb-4 mr-4"
                       onClick={() => {
                         setShowActionsMode(
-                          showActionsMode === 'playwright'
-                            ? 'puppeteer'
-                            : 'playwright'
+                          showActionsMode === ActionsMode.Playwright
+                            ? ActionsMode.Puppeteer
+                            : ActionsMode.Playwright
                         );
                       }}
                     >
                       Switch to{' '}
-                      {showActionsMode === 'playwright'
-                        ? 'Puppeteer'
-                        : 'Playwright'}
+                      {showActionsMode === ActionsMode.Playwright
+                        ? ActionsMode.Puppeteer
+                        : ActionsMode.Playwright}
                     </span>
                     <CopyToClipboard
                       text={genCode(actions, true, showActionsMode)}
@@ -374,11 +373,11 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
               </div>
             </div>
 
-            {(showActionsMode === 'playwright' ||
-              showActionsMode === 'puppeteer') && (
+            {(showActionsMode === ActionsMode.Playwright ||
+              showActionsMode === ActionsMode.Puppeteer) && (
               <CodeGen actions={actions} library={showActionsMode} />
             )}
-            {showActionsMode === 'actions' && <ActionList actions={actions} />}
+            {showActionsMode ===ActionsMode.Actions && <ActionList actions={actions} />}
           </div>
         )}
       </div>
