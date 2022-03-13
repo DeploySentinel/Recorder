@@ -1,6 +1,6 @@
-import { PlaywrightScriptBuilder } from '../src/pages/builders';
+import { PlaywrightScriptBuilder, PuppeteerScriptBuilder } from '../src/pages/builders';
 
-describe('Test CodeGen', () => {
+describe('Test builders', () => {
   describe('PlaywrightScriptBuilder', () => {
     let builder: any;
     let mockWaitForActionAndNavigation: any;
@@ -75,6 +75,82 @@ describe('Test CodeGen', () => {
 
     test('awaitText', () => {
       expect(builder.awaitText('foo')).toBe("await page.waitForSelector('text=foo')");
+    });
+  });
+
+  describe('PuppeteerScriptBuilder', () => {
+    let builder: any;
+    let mockWaitForSelectorAndNavigation: any;
+    let mockWaitForSelector: any
+
+    beforeEach(() => {
+      builder = new PuppeteerScriptBuilder();
+
+      mockWaitForSelectorAndNavigation = jest.spyOn(builder, 'waitForSelectorAndNavigation')
+        .mockImplementation(() => 'foo');
+      mockWaitForSelectorAndNavigation = jest.spyOn(builder, 'waitForSelector')
+        .mockImplementation(() => 'bar');
+    });
+
+    test('click', () => {
+      expect(builder.click('selector', true)).toBe('foo');
+      expect(builder.waitForSelectorAndNavigation).toHaveBeenNthCalledWith(1, 'selector', "page.click('selector')");
+      expect(builder.click('selector', false)).toBe("await bar;\n  await page.click('selector');");
+      expect(builder.waitForSelector).toHaveBeenNthCalledWith(1, 'selector');
+    });
+
+    test('hover', () => {
+      expect(builder.hover('selector', true)).toBe('foo');
+      expect(builder.waitForSelectorAndNavigation).toHaveBeenNthCalledWith(1, 'selector', "page.hover('selector')");
+      expect(builder.hover('selector', false)).toBe("await bar;\n  await page.hover('selector');");
+      expect(builder.waitForSelector).toHaveBeenNthCalledWith(1, 'selector');
+    });
+
+    test('load', () => {
+      expect(builder.load('url')).toBe("await page.goto('url');");
+    });
+
+    test('resize', () => {
+      expect(builder.resize(1, 1)).toBe('await page.setViewport({ width: 1, height: 1 });');
+    });
+
+    test('type', () => {
+      expect(builder.type('selector', 'value', true)).toBe('foo');
+      expect(builder.waitForSelectorAndNavigation).toHaveBeenNthCalledWith(1, 'selector', "page.type('selector', 'value')");
+      expect(builder.type('selector', 'value', false)).toBe("await bar;\n  await page.type('selector', 'value');");
+      expect(builder.waitForSelector).toHaveBeenNthCalledWith(1, 'selector');
+    });
+
+    test('fill', () => {
+      expect(builder.fill('selector', 'value', true)).toBe('foo');
+      expect(builder.waitForSelectorAndNavigation).toHaveBeenNthCalledWith(1, 'selector:not([disabled])', "page.type('selector', 'value')");
+      expect(builder.fill('selector', 'value', false)).toBe("await bar;\n  await page.type('selector', 'value');");
+      expect(builder.waitForSelector).toHaveBeenNthCalledWith(1, 'selector:not([disabled])');
+    });
+
+    test('select', () => {
+      expect(builder.select('selector', 'value', true)).toBe('foo');
+      expect(builder.waitForSelectorAndNavigation).toHaveBeenNthCalledWith(1, 'selector', "page.select('selector', 'value')");
+      expect(builder.select('selector', 'value', false)).toBe("await bar;\n  await page.select('selector', 'value');");
+      expect(builder.waitForSelector).toHaveBeenNthCalledWith(1, 'selector');
+    });
+
+    test('keydown', () => {
+      expect(builder.keydown('selector', 'value', true)).toBe('foo');
+      expect(builder.waitForSelectorAndNavigation).toHaveBeenNthCalledWith(1, 'selector', "page.keyboard.press('value')");
+      expect(builder.keydown('selector', 'value', false)).toBe("await page.waitForSelector('selector');\n  await page.keyboard.press('value');");
+    });
+
+    test('wheel', () => {
+      expect(builder.wheel(1.6, 1.1)).toBe('await page.evaluate(() => window.scrollBy(1.6, 1.1));');
+    });
+
+    test('fullScreenshot', () => {
+      expect(builder.fullScreenshot()).toBe("await page.screenshot({ path: 'screenshot.png', fullPage: true });");
+    });
+
+    test('awaitText', () => {
+      expect(builder.awaitText('foo')).toBe(`await page.waitForFunction("document.body.innerText.includes('foo')");`);
     });
   });
 });
