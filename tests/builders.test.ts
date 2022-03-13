@@ -88,8 +88,24 @@ describe('Test builders', () => {
 
       mockWaitForSelectorAndNavigation = jest.spyOn(builder, 'waitForSelectorAndNavigation')
         .mockImplementation(() => 'foo');
-      mockWaitForSelectorAndNavigation = jest.spyOn(builder, 'waitForSelector')
+      mockWaitForSelector = jest.spyOn(builder, 'waitForSelector')
         .mockImplementation(() => 'bar');
+    });
+
+    test('waitForSelector', () => {
+      mockWaitForSelector.mockRestore();
+      expect(builder.waitForSelector('foo')).toBe("page.waitForSelector('foo')");
+    });
+
+    test('waitForNavigation', () => {
+      expect(builder.waitForNavigation()).toBe('page.waitForNavigation()');
+    });
+
+    test('waitForSelectorAndNavigation', () => {
+      mockWaitForSelectorAndNavigation.mockRestore();
+      mockWaitForSelector.mockRestore();
+      expect(builder.waitForSelectorAndNavigation('foo', 'bar'))
+        .toBe(`await page.waitForSelector('foo');\n  await Promise.all([\n    bar,\n    page.waitForNavigation()\n  ]);`);
     });
 
     test('click', () => {
