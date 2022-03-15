@@ -1,6 +1,7 @@
 import { finder } from '@medv/finder';
 
 import type { Action } from '../types';
+import { ActionType } from '../types';
 
 function genAttributeSet(element: HTMLElement, attributes: string[]) {
   return new Set(
@@ -94,9 +95,45 @@ export default function genSelectors(element: HTMLElement | null) {
 }
 
 export function getBestSelectorForAction(action: Action) {
-  if (action.type === 'click' || action.type === 'hover') {
-    const selectors = action.selectors;
-    if (action.tagName === 'INPUT') {
+  switch (action.type) {
+    case ActionType.Click:
+    case ActionType.Hover: {
+      const selectors = action.selectors;
+      if (action.tagName === 'INPUT') {
+        return (
+          selectors.testIdSelector ??
+          selectors?.id ??
+          selectors?.formSelector ??
+          selectors?.accessibilitySelector ??
+          selectors?.generalSelector ??
+          selectors?.attrSelector ??
+          null
+        );
+      }
+      if (action.tagName === 'A') {
+        return (
+          selectors.testIdSelector ??
+          selectors?.id ??
+          selectors?.hrefSelector ??
+          selectors?.accessibilitySelector ??
+          selectors?.generalSelector ??
+          selectors?.attrSelector ??
+          null
+        );
+      }
+      return (
+        selectors.testIdSelector ??
+        selectors?.id ??
+        selectors?.accessibilitySelector ??
+        selectors?.hrefSelector ??
+        selectors?.generalSelector ??
+        selectors?.attrSelector ??
+        null
+      );
+    }
+    case ActionType.Input:
+    case ActionType.Keydown: {
+      const selectors = action.selectors;
       return (
         selectors.testIdSelector ??
         selectors?.id ??
@@ -107,37 +144,8 @@ export function getBestSelectorForAction(action: Action) {
         null
       );
     }
-    if (action.tagName === 'A') {
-      return (
-        selectors.testIdSelector ??
-        selectors?.id ??
-        selectors?.hrefSelector ??
-        selectors?.accessibilitySelector ??
-        selectors?.generalSelector ??
-        selectors?.attrSelector ??
-        null
-      );
-    }
-    return (
-      selectors.testIdSelector ??
-      selectors?.id ??
-      selectors?.accessibilitySelector ??
-      selectors?.hrefSelector ??
-      selectors?.generalSelector ??
-      selectors?.attrSelector ??
-      null
-    );
-  } else if (action.type === 'input' || action.type === 'keydown') {
-    const selectors = action.selectors;
-    return (
-      selectors.testIdSelector ??
-      selectors?.id ??
-      selectors?.formSelector ??
-      selectors?.accessibilitySelector ??
-      selectors?.generalSelector ??
-      selectors?.attrSelector ??
-      null
-    );
+    default:
+      break;
   }
   return null;
 }

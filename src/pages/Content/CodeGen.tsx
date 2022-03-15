@@ -6,6 +6,7 @@ import { getBestSelectorForAction } from './selector';
 import { PlaywrightScriptBuilder, PuppeteerScriptBuilder } from '../builders';
 
 import type { Action } from '../types';
+import { ActionType } from '../types';
 
 const truncateText = (str: string, maxLen: number) => {
   return `${str.substring(0, maxLen)}${str.length > maxLen ? '...' : ''}`;
@@ -13,35 +14,35 @@ const truncateText = (str: string, maxLen: number) => {
 
 function describeAction(action: Action) {
 
-  return action?.type === 'click'
+  return action?.type === ActionType.Click
     ? `Click on <${action.tagName.toLowerCase()}> ${
         action.selectors.text != null && action.selectors.text.length > 0
           ? `"${truncateText(action.selectors.text.replace('\n', ' '), 25)}"`
           : getBestSelectorForAction(action)
       }`
-    : action?.type === 'hover'
+    : action?.type === ActionType.Hover
     ? `Hover over <${action.tagName.toLowerCase()}> ${
         action.selectors.text != null && action.selectors.text.length > 0
           ? `"${truncateText(action.selectors.text.replace('\n', ' '), 25)}"`
           : getBestSelectorForAction(action)
       }`
-    : action?.type === 'input'
+    : action?.type === ActionType.Input
     ? `Fill "${
         action.value
       }" on <${action.tagName.toLowerCase()}> ${getBestSelectorForAction(
         action
       )}`
-    : action?.type == 'keydown'
+    : action?.type == ActionType.Keydown
     ? `Press ${action.key} on ${action.tagName.toLowerCase()}`
-    : action?.type == 'load'
+    : action?.type == ActionType.Load
     ? `Load "${action.url}"`
-    : action.type === 'resize'
+    : action.type === ActionType.Resize
     ? `Resize window to ${action.width} x ${action.height}`
-    : action.type === 'wheel'
+    : action.type === ActionType.Wheel
     ? `Scroll wheel by X:${action.deltaX}, Y:${action.deltaY}`
-    : action.type === 'fullScreenshot'
+    : action.type === ActionType.FullScreenshot
     ? `Take full page screenshot`
-    : action.type === 'awaitText'
+    : action.type === ActionType.AwaitText
     ? `Wait for text "${truncateText(action.text, 25)}" to appear`
     : '';
 }
@@ -63,6 +64,20 @@ const fillableInputTypes = new Set([
   'week',
 ]);
 
+export const isSupportedActionType = (actionType: any) => {
+  return [
+    ActionType.Click,
+    ActionType.Hover,
+    ActionType.Keydown,
+    ActionType.Input,
+    ActionType.Load,
+    ActionType.Resize,
+    ActionType.Wheel,
+    ActionType.FullScreenshot,
+    ActionType.AwaitText,
+  ].includes(actionType);
+}
+
 export function genCode(
   actions: Action[],
   showComments: boolean = true,
@@ -72,40 +87,57 @@ export function genCode(
     lib === 'playwright'
       ? new PlaywrightScriptBuilder()
       : new PuppeteerScriptBuilder();
-  const lines = actions.map((action, i) => {
+
+  for (let i = 0; i < actions.length; i++) {
+    const action = actions[i];
+
+    if (!(isSupportedActionType(action.type))) {
+      continue;
+    }
+
     const nextAction = actions[i + 1];
-    const causesNavigation = nextAction?.type === 'navigate';
+    const causesNavigation = nextAction?.type === ActionType.Navigate;
     const actionDescription = `${describeAction(action)}${
       causesNavigation && lib === 'puppeteer' ? ' and await navigation' : ''
     }`;
-    let line = '';
+
+    if (showComments) {
+      scriptBuilder.pushComments(`// ${actionDescription}`);
+    }
+
+    let bestSelector = null;
 
     // Selector-based actions
     if (
-      action.type === 'click' ||
-      action.type === 'input' ||
-      action.type === 'keydown' ||
-      action.type === 'hover'
+      action.type === ActionType.Click ||
+      action.type === ActionType.Input ||
+      action.type === ActionType.Keydown ||
+      action.type === ActionType.Hover
     ) {
-      const bestSelector = getBestSelectorForAction(action);
-      if (bestSelector == null) {
+      bestSelector = getBestSelectorForAction(action);
+      if (bestSelector === null) {
         throw new Error(`Cant generate selector for action ${action}`);
       }
+    }
 
-      if (action.type === 'click') {
-        line += scriptBuilder.click(bestSelector, causesNavigation);
-      } else if (action.type === 'hover') {
-        line += scriptBuilder.hover(bestSelector, causesNavigation);
-      } else if (action.type === 'keydown') {
-        line += scriptBuilder.keydown(
-          bestSelector,
+    switch (action.type) {
+      case ActionType.Click:
+        scriptBuilder.click(bestSelector as string, causesNavigation);
+        break;
+      case ActionType.Hover:
+        scriptBuilder.hover(bestSelector as string, causesNavigation);
+        break;
+      case ActionType.Keydown:
+        scriptBuilder.keydown(
+          bestSelector as string,
           action.key ?? '',
           causesNavigation
         );
-      } else if (action.type === 'input') {
+        break;
+      case ActionType.Input: {
         if (action.tagName === 'SELECT') {
-          line += scriptBuilder.select(
-            bestSelector,
+          scriptBuilder.select(
+            bestSelector as string,
             action.value ?? '',
             causesNavigation
           );
@@ -117,38 +149,41 @@ export function genCode(
           action.tagName === 'TEXTAREA'
         ) {
           // Do more actionability checks
-          line += scriptBuilder.fill(
-            bestSelector,
+          scriptBuilder.fill(
+            bestSelector as string,
             action.value ?? '',
             causesNavigation
           );
         } else {
-          line += scriptBuilder.type(
-            bestSelector,
+          scriptBuilder.type(
+            bestSelector as string,
             action.value ?? '',
             causesNavigation
           );
         }
+        break;
       }
-    } else if (action.type === 'load') {
-      line += scriptBuilder.load(action.url);
-    } else if (action.type === 'resize') {
-      line += scriptBuilder.resize(action.width, action.height);
-    } else if (action.type === 'wheel') {
-      line += scriptBuilder.wheel(action.deltaX, action.deltaY);
-    } else if (action.type === 'fullScreenshot') {
-      line += scriptBuilder.fullScreenshot();
-    } else if (action.type === 'awaitText') {
-      line += scriptBuilder.awaitText(action.text);
-    } else {
-      return null;
+      case ActionType.Load:
+        scriptBuilder.load(action.url);
+        break;
+      case ActionType.Resize:
+        scriptBuilder.resize(action.width, action.height);
+        break;
+      case ActionType.Wheel:
+        scriptBuilder.wheel(action.deltaX, action.deltaY);
+        break;
+      case ActionType.FullScreenshot:
+        scriptBuilder.fullScreenshot();
+        break;
+      case ActionType.AwaitText:
+        scriptBuilder.awaitText(action.text);
+        break;
+      default:
+        break;
     }
-    return `${showComments ? `  // ${actionDescription}\n` : ''}  ${line}`;
-  });
+  }
 
-  return scriptBuilder.fileTemplate(
-    lines.filter((v) => v != null).join('\n\n')
-  );
+  return scriptBuilder.build();
 }
 
 export default function CodeGen({
