@@ -18,7 +18,7 @@ export enum ActionType {
   Wheel = 'wheel',
 }
 
-export interface BaseAction {
+export class BaseAction {
   type: ActionType;
   tagName: string;
   inputType: string | undefined;
@@ -71,7 +71,7 @@ class AwaitTextAction extends BaseAction {
   text: string;
 }
 
-class ResizeAction extends BaseAction {
+export class ResizeAction extends BaseAction {
   type: ActionType.Resize;
   width: number;
   height: number;

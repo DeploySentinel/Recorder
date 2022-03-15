@@ -20,29 +20,29 @@ function describeAction(action: Action) {
           ? `"${truncateText(action.selectors.text.replace('\n', ' '), 25)}"`
           : getBestSelectorForAction(action)
       }`
-    : action?.type === 'hover'
+    : action?.type === ActionType.Hover
     ? `Hover over <${action.tagName.toLowerCase()}> ${
         action.selectors.text != null && action.selectors.text.length > 0
           ? `"${truncateText(action.selectors.text.replace('\n', ' '), 25)}"`
           : getBestSelectorForAction(action)
       }`
-    : action?.type === 'input'
+    : action?.type === ActionType.Input
     ? `Fill "${
         action.value
       }" on <${action.tagName.toLowerCase()}> ${getBestSelectorForAction(
         action
       )}`
-    : action?.type == 'keydown'
+    : action?.type == ActionType.Keydown
     ? `Press ${action.key} on ${action.tagName.toLowerCase()}`
-    : action?.type == 'load'
+    : action?.type == ActionType.Load
     ? `Load "${action.url}"`
-    : action.type === 'resize'
+    : action.type === ActionType.Resize
     ? `Resize window to ${action.width} x ${action.height}`
-    : action.type === 'wheel'
+    : action.type === ActionType.Wheel
     ? `Scroll wheel by X:${action.deltaX}, Y:${action.deltaY}`
-    : action.type === 'fullScreenshot'
+    : action.type === ActionType.FullScreenshot
     ? `Take full page screenshot`
-    : action.type === 'awaitText'
+    : action.type === ActionType.AwaitText
     ? `Wait for text "${truncateText(action.text, 25)}" to appear`
     : '';
 }
@@ -64,6 +64,20 @@ const fillableInputTypes = new Set([
   'week',
 ]);
 
+export const isSupportedActionType = (actionType: any) => {
+  return [
+    ActionType.Click,
+    ActionType.Hover,
+    ActionType.Keydown,
+    ActionType.Input,
+    ActionType.Load,
+    ActionType.Resize,
+    ActionType.Wheel,
+    ActionType.FullScreenshot,
+    ActionType.AwaitText,
+  ].includes(actionType);
+}
+
 export function genCode(
   actions: Action[],
   showComments: boolean = true,
@@ -76,8 +90,13 @@ export function genCode(
 
   for (let i = 0; i < actions.length; i++) {
     const action = actions[i];
+
+    if (!(isSupportedActionType(action.type))) {
+      continue;
+    }
+
     const nextAction = actions[i + 1];
-    const causesNavigation = nextAction?.type === 'navigate';
+    const causesNavigation = nextAction?.type === ActionType.Navigate;
     const actionDescription = `${describeAction(action)}${
       causesNavigation && lib === 'puppeteer' ? ' and await navigation' : ''
     }`;

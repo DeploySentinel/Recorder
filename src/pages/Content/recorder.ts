@@ -2,7 +2,7 @@ import genSelectors from './selector';
 import { localStorageGet } from '../Common/utils';
 import debounce from 'lodash.debounce';
 
-import type { BaseAction, ResizeAction, Action } from '../types';
+import { ActionType, BaseAction, ResizeAction } from '../types';
 
 function isEventFromOverlay(event: Event) {
   return (
@@ -19,7 +19,7 @@ function isEventFromOverlay(event: Event) {
  */
 function _shouldGenerateKeyPressFor(event: KeyboardEvent): boolean {
   // Backspace, Delete, AltGraph are changing input, will handle it there.
-  if (['Backspace', 'Delete', 'AltGraph'].includes(event.key)) return false;
+  if (['AltGraph', 'Backspace', 'Delete'].includes(event.key)) return false;
   // Ignore the QWERTZ shortcut for creating a at sign on MacOS
   if (event.key === '@' && event.code === 'KeyL') return false;
   // Allow and ignore common used shortcut for pasting.
@@ -45,7 +45,7 @@ function buildBaseAction(
     isPassword:
       target instanceof HTMLInputElement &&
       target.type.toLowerCase() === 'password',
-    type: event.type,
+    type: event.type as ActionType,
     tagName: target.tagName,
     inputType: target instanceof HTMLInputElement ? target.type : undefined,
     selectors: genSelectors(target) ?? {},
@@ -308,8 +308,8 @@ class Recorder {
       lastResizeAction.width !== width ||
       lastResizeAction.height !== height
     ) {
-      const action: Action = {
-        type: 'resize',
+      const action = {
+        type: ActionType.Resize,
         width,
         height,
       };
@@ -332,8 +332,8 @@ class Recorder {
   private debouncedOnResize = debounce(this.onResize, 300);
 
   public onFullScreenshot = (): void => {
-    const action: Action = {
-      type: 'fullScreenshot',
+    const action = {
+      type: ActionType.FullScreenshot,
     };
 
     this.appendToRecording(action);

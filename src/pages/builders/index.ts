@@ -6,12 +6,12 @@ export abstract class ScriptBuilder {
   }
 
   pushActionWithOneBreak = (action: string) => {
-    this.actions.push(`  ${action}\n`);
+    this.actions.push(`\n  ${action}`);
     return this;
   }
 
   pushActionWithTwoBreaks = (action: string) => {
-    this.actions.push(`  ${action}\n\n`);
+    this.actions.push(`\n  ${action}\n`);
     return this;
   }
 
@@ -130,15 +130,14 @@ export class PlaywrightScriptBuilder extends ScriptBuilder {
   }
 
   build = () => {
+    console.log(this.actions)
     return `const playwright = require('playwright');
 (async () => {
   const browser = await playwright['chromium'].launch({
     // headless: false, slowMo: 100, // Uncomment to visualize test
   });
   const page = await browser.newPage();
-
 ${this.actions.join('')}
-
   await browser.close();
 })();`;
   }
@@ -264,9 +263,7 @@ export class PuppeteerScriptBuilder extends ScriptBuilder {
     // headless: false, slowMo: 100, // Uncomment to visualize test
   });
   const page = await browser.newPage();
-
 ${this.actions.join('')}
-
   await browser.close();
 })();`;
   };
