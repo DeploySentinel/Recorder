@@ -23,7 +23,7 @@ import {
 } from '../Common/utils';
 
 import type { Action } from '../types';
-import { ActionsMode } from '../types';
+import { ActionsMode, ScriptType } from '../types';
 
 import PopupStyle from './Popup.css';
 
@@ -34,7 +34,8 @@ function LastStepPanel({
   actions: Action[];
   onBack: () => void;
 }) {
-  const [showActionsMode, setShowActionsMode] = useState<ActionsMode>(ActionsMode.Playwright);
+  const [showActionsMode, setShowActionsMode] = useState<ActionsMode>(ActionsMode.Code);
+  const [showScriptType, setScriptType] = useState<ScriptType>(ScriptType.Playwright);
   const [copyCodeConfirm, setCopyCodeConfirm] = useState<boolean>(false);
 
   return (
@@ -54,7 +55,7 @@ function LastStepPanel({
             className="link-button"
             onClick={() => {
               setShowActionsMode(
-                showActionsMode === ActionsMode.Actions ? ActionsMode.Playwright : ActionsMode.Actions
+                showActionsMode === ActionsMode.Actions ? ActionsMode.Code : ActionsMode.Actions
               );
             }}
           >
@@ -62,23 +63,22 @@ function LastStepPanel({
           </span>
         </div>
       </div>
-      {(showActionsMode === ActionsMode.Playwright ||
-        showActionsMode === ActionsMode.Puppeteer) && (
+      {showActionsMode === ActionsMode.Code && (
         <div className="mt-4">
           <div className="d-flex justify-between items-end mb-4">
             <span
               className="text-sm link-button"
               onClick={() => {
-                setShowActionsMode(
-                  showActionsMode ===  ActionsMode.Playwright ? ActionsMode.Puppeteer : ActionsMode.Playwright
+                setScriptType(
+                  showScriptType ===  ScriptType.Playwright ? ScriptType.Puppeteer : ScriptType.Playwright
                 );
               }}
             >
               Switch to{' '}
-              {showActionsMode === ActionsMode.Playwright ? 'Puppeteer' : 'Playwright'}
+              {showScriptType === ScriptType.Playwright ? 'Puppeteer' : 'Playwright'}
             </span>
             <CopyToClipboard
-              text={genCode(actions, true, showActionsMode)}
+              text={genCode(actions, true, showScriptType)}
               onCopy={() => {
                 setCopyCodeConfirm(true);
                 setTimeout(() => {
@@ -101,7 +101,7 @@ function LastStepPanel({
           </div>
           <CodeGen
             actions={actions}
-            library={showActionsMode}
+            library={showScriptType}
             styles={{ height: 400 }}
           />
         </div>

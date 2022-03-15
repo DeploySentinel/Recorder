@@ -20,7 +20,7 @@ import ActionList from './ActionList';
 import CodeGen, { genCode } from './CodeGen';
 
 import type { Action } from '../types';
-import { ActionsMode, ActionType } from '../types';
+import { ActionType, ActionsMode, ScriptType } from '../types';
 
 import ControlBarStyle from './ControlBar.css';
 import { endRecording } from '../Common/endRecording';
@@ -107,7 +107,8 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
   const [actions, setActions] = useState<Action[]>([]);
 
   const [showAllActions, setShowAllActions] = useState<boolean>(false);
-  const [showActionsMode, setShowActionsMode] = useState<ActionsMode>(ActionsMode.Playwright);
+  const [showActionsMode, setShowActionsMode] = useState<ActionsMode>(ActionsMode.Code);
+  const [showScriptType, setScriptType] = useState<ScriptType>(ScriptType.Playwright);
 
   const [copyCodeConfirm, setCopyCodeConfirm] = useState<boolean>(false);
   const [screenshotConfirm, setScreenshotConfirm] = useState<boolean>(false);
@@ -124,7 +125,7 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
 
     // Show Code
     setShowAllActions(true);
-    setShowActionsMode(ActionsMode.Playwright);
+    setScriptType(ScriptType.Playwright);
 
     // Clear out highlighter
     document.removeEventListener('mousemove', handleMouseMoveRef.current, true);
@@ -300,7 +301,7 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
                   }`}
                   onClick={() => {
                     setShowActionsMode(
-                      showActionsMode === ActionsMode.Actions ? ActionsMode.Playwright : ActionsMode.Actions
+                      showActionsMode === ActionsMode.Actions ? ActionsMode.Code : ActionsMode.Actions
                     );
                   }}
                 >
@@ -329,26 +330,26 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
                 )}
               </div>
               <div>
-                {(showActionsMode === ActionsMode.Playwright ||
-                  showActionsMode === ActionsMode.Puppeteer) && (
+                {(showScriptType === ScriptType.Playwright ||
+                  showScriptType === ScriptType.Puppeteer) && (
                   <>
                     <span
                       className="text-sm link-button mb-4 mr-4"
                       onClick={() => {
-                        setShowActionsMode(
-                          showActionsMode === ActionsMode.Playwright
-                            ? ActionsMode.Puppeteer
-                            : ActionsMode.Playwright
+                        setScriptType(
+                          showScriptType === ScriptType.Playwright
+                            ? ScriptType.Puppeteer
+                            : ScriptType.Playwright
                         );
                       }}
                     >
                       Switch to{' '}
-                      {showActionsMode === ActionsMode.Playwright
-                        ? ActionsMode.Puppeteer
-                        : ActionsMode.Playwright}
+                      {showScriptType === ScriptType.Playwright
+                        ? ScriptType.Puppeteer
+                        : ScriptType.Playwright}
                     </span>
                     <CopyToClipboard
-                      text={genCode(actions, true, showActionsMode)}
+                      text={genCode(actions, true, showScriptType)}
                       onCopy={() => {
                         setCopyCodeConfirm(true);
                         setTimeout(() => {
@@ -373,11 +374,8 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
               </div>
             </div>
 
-            {(showActionsMode === ActionsMode.Playwright ||
-              showActionsMode === ActionsMode.Puppeteer) && (
-              <CodeGen actions={actions} library={showActionsMode} />
-            )}
-            {showActionsMode ===ActionsMode.Actions && <ActionList actions={actions} />}
+            {showActionsMode === ActionsMode.Code && <CodeGen actions={actions} library={showScriptType} />}
+            {showActionsMode === ActionsMode.Actions && <ActionList actions={actions} />}
           </div>
         )}
       </div>
