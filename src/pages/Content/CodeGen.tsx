@@ -6,7 +6,7 @@ import { getBestSelectorForAction } from './selector';
 import { PlaywrightScriptBuilder, PuppeteerScriptBuilder } from '../builders';
 
 import type { Action } from '../types';
-import { ActionType } from '../types';
+import { ActionType, ScriptType } from '../types';
 
 const truncateText = (str: string, maxLen: number) => {
   return `${str.substring(0, maxLen)}${str.length > maxLen ? '...' : ''}`;
@@ -81,7 +81,7 @@ export const isSupportedActionType = (actionType: any) => {
 export function genCode(
   actions: Action[],
   showComments: boolean = true,
-  lib: 'playwright' | 'puppeteer' = 'playwright'
+  lib: ScriptType = 'playwright' as ScriptType,
 ): string {
   const scriptBuilder =
     lib === 'playwright'
@@ -192,7 +192,7 @@ export default function CodeGen({
   styles,
 }: {
   actions: Action[];
-  library: 'playwright' | 'puppeteer';
+  library: ScriptType;
   styles?: React.CSSProperties;
 }) {
   return (

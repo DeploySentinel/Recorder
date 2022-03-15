@@ -1,8 +1,12 @@
 export enum ActionsMode {
   Actions = 'actions',
   Code = 'code',
-  Playwright = 'playwright',
+}
+
+export enum ScriptType {
   Puppeteer = 'puppeteer',
+  Playwright = 'playwright',
+  Cypress = 'cypress',
 }
 
 export enum ActionType {
