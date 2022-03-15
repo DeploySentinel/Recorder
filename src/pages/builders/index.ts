@@ -5,13 +5,13 @@ export abstract class ScriptBuilder {
     this.actions = [];
   }
 
-  pushActionWithOneBreak = (action: string) => {
-    this.actions.push(`\n  ${action}`);
+  pushComments = (comments: string) => {
+    this.actions.push(`\n  ${comments}`);
     return this;
   }
 
-  pushActionWithTwoBreaks = (action: string) => {
-    this.actions.push(`\n  ${action}\n`);
+  pushCodes = (codes: string) => {
+    this.actions.push(`\n  ${codes}\n`);
     return this;
   }
 
@@ -53,7 +53,7 @@ export class PlaywrightScriptBuilder extends ScriptBuilder {
     const action = causesNavigation
       ? this.waitForActionAndNavigation(actionStr)
       : `await ${actionStr};`;
-    this.pushActionWithTwoBreaks(action);
+    this.pushCodes(action);
     return this;
   }
 
@@ -62,17 +62,17 @@ export class PlaywrightScriptBuilder extends ScriptBuilder {
     const action = causesNavigation
       ? this.waitForActionAndNavigation(actionStr)
       : `await ${actionStr};`;
-    this.pushActionWithTwoBreaks(action);
+    this.pushCodes(action);
     return this;
   }
 
   load = (url: string) => {
-    this.pushActionWithTwoBreaks(`await page.goto('${url}');`);
+    this.pushCodes(`await page.goto('${url}');`);
     return this;
   }
 
   resize = (width: number, height: number) => {
-    this.pushActionWithTwoBreaks(`await page.setViewportSize({ width: ${width}, height: ${height} });`);
+    this.pushCodes(`await page.setViewportSize({ width: ${width}, height: ${height} });`);
     return this;
   }
 
@@ -81,7 +81,7 @@ export class PlaywrightScriptBuilder extends ScriptBuilder {
     const action = causesNavigation
       ? this.waitForActionAndNavigation(actionStr)
       : `await ${actionStr};`;
-    this.pushActionWithTwoBreaks(action);
+    this.pushCodes(action);
     return this;
   }
 
@@ -90,7 +90,7 @@ export class PlaywrightScriptBuilder extends ScriptBuilder {
     const action = causesNavigation
       ? this.waitForActionAndNavigation(actionStr)
       : `await ${actionStr};`;
-    this.pushActionWithTwoBreaks(action);
+    this.pushCodes(action);
     return this;
   }
 
@@ -99,7 +99,7 @@ export class PlaywrightScriptBuilder extends ScriptBuilder {
     const action = causesNavigation
       ? this.waitForActionAndNavigation(actionStr)
       : `await ${actionStr};`;
-    this.pushActionWithTwoBreaks(action);
+    this.pushCodes(action);
     return this;
   }
 
@@ -108,29 +108,28 @@ export class PlaywrightScriptBuilder extends ScriptBuilder {
     const action = causesNavigation
       ? this.waitForActionAndNavigation(actionStr)
       : `await ${actionStr};`;
-    this.pushActionWithTwoBreaks(action);
+    this.pushCodes(action);
     return this;
   }
 
   wheel = (deltaX: number, deltaY: number) => {
-    this.pushActionWithTwoBreaks(`await page.mouse.wheel(${Math.floor(deltaX)}, ${Math.floor(
+    this.pushCodes(`await page.mouse.wheel(${Math.floor(deltaX)}, ${Math.floor(
       deltaY
     )});`);
     return this;
   }
 
   fullScreenshot = () => {
-    this.pushActionWithTwoBreaks(`await page.screenshot({ path: 'screenshot.png', fullPage: true });`);
+    this.pushCodes(`await page.screenshot({ path: 'screenshot.png', fullPage: true });`);
     return this;
   }
 
   awaitText = (text: string) => {
-    this.pushActionWithTwoBreaks(`await page.waitForSelector('text=${text}')`);
+    this.pushCodes(`await page.waitForSelector('text=${text}')`);
     return this;
   }
 
   build = () => {
-    console.log(this.actions)
     return `const playwright = require('playwright');
 (async () => {
   const browser = await playwright['chromium'].launch({
@@ -159,10 +158,10 @@ export class PuppeteerScriptBuilder extends ScriptBuilder {
   click = (selector: string, causesNavigation: boolean) => {
     const pageClick = `page.click('${selector}')`;
     if (causesNavigation) {
-      this.pushActionWithTwoBreaks(this.waitForSelectorAndNavigation(selector, pageClick));
+      this.pushCodes(this.waitForSelectorAndNavigation(selector, pageClick));
     }
     else {
-      this.pushActionWithTwoBreaks(`await ${this.waitForSelector(selector)};\n  await ${pageClick};`);
+      this.pushCodes(`await ${this.waitForSelector(selector)};\n  await ${pageClick};`);
     }
     return this;
   }
@@ -170,31 +169,31 @@ export class PuppeteerScriptBuilder extends ScriptBuilder {
   hover = (selector: string, causesNavigation: boolean) => {
     const pageHover = `page.hover('${selector}')`;
     if (causesNavigation) {
-      this.pushActionWithTwoBreaks(this.waitForSelectorAndNavigation(selector, pageHover));
+      this.pushCodes(this.waitForSelectorAndNavigation(selector, pageHover));
     }
     else {
-      this.pushActionWithTwoBreaks(`await ${this.waitForSelector(selector)};\n  await ${pageHover};`);
+      this.pushCodes(`await ${this.waitForSelector(selector)};\n  await ${pageHover};`);
     }
     return this;
   }
 
   load = (url: string) => {
-    this.pushActionWithTwoBreaks(`await page.goto('${url}');`);
+    this.pushCodes(`await page.goto('${url}');`);
     return this;
   }
 
   resize = (width: number, height: number) => {
-    this.pushActionWithTwoBreaks(`await page.setViewport({ width: ${width}, height: ${height} });`);
+    this.pushCodes(`await page.setViewport({ width: ${width}, height: ${height} });`);
     return this;
   }
 
   type = (selector: string, value: string, causesNavigation: boolean) => {
     const pageType = `page.type('${selector}', '${value}')`;
     if (causesNavigation) {
-      this.pushActionWithTwoBreaks(this.waitForSelectorAndNavigation(selector, pageType));
+      this.pushCodes(this.waitForSelectorAndNavigation(selector, pageType));
     }
     else {
-      this.pushActionWithTwoBreaks(`await ${this.waitForSelector(selector)};\n  await ${pageType};`)
+      this.pushCodes(`await ${this.waitForSelector(selector)};\n  await ${pageType};`)
     }
     return this;
   }
@@ -204,13 +203,13 @@ export class PuppeteerScriptBuilder extends ScriptBuilder {
   fill = (selector: string, value: string, causesNavigation: boolean) => {
     const pageType = `page.type('${selector}', '${value}')`;
     if (causesNavigation) {
-      this.pushActionWithTwoBreaks(this.waitForSelectorAndNavigation(
+      this.pushCodes(this.waitForSelectorAndNavigation(
         `${selector}:not([disabled])`,
         pageType
       ));
     }
     else {
-      this.pushActionWithTwoBreaks(`await ${this.waitForSelector(
+      this.pushCodes(`await ${this.waitForSelector(
         `${selector}:not([disabled])`
       )};\n  await ${pageType};`);
     }
@@ -220,10 +219,10 @@ export class PuppeteerScriptBuilder extends ScriptBuilder {
   select = (selector: string, option: string, causesNavigation: boolean) => {
     const pageSelectOption = `page.select('${selector}', '${option}')`;
     if (causesNavigation) {
-      this.pushActionWithTwoBreaks(this.waitForSelectorAndNavigation(selector, pageSelectOption));
+      this.pushCodes(this.waitForSelectorAndNavigation(selector, pageSelectOption));
     }
     else {
-      this.pushActionWithTwoBreaks(`await ${this.waitForSelector(
+      this.pushCodes(`await ${this.waitForSelector(
         selector
       )};\n  await ${pageSelectOption};`);
     }
@@ -233,26 +232,26 @@ export class PuppeteerScriptBuilder extends ScriptBuilder {
   keydown = (selector: string, key: string, causesNavigation: boolean) => {
     const pagePress = `page.keyboard.press('${key}')`;
     if (causesNavigation) {
-      this.pushActionWithTwoBreaks(this.waitForSelectorAndNavigation(selector, pagePress));
+      this.pushCodes(this.waitForSelectorAndNavigation(selector, pagePress));
     }
     else {
-      this.pushActionWithTwoBreaks(`await page.waitForSelector('${selector}');\n  await page.keyboard.press('${key}');`);
+      this.pushCodes(`await page.waitForSelector('${selector}');\n  await page.keyboard.press('${key}');`);
     }
     return this;
   }
 
   wheel = (deltaX: number, deltaY: number) => {
-    this.pushActionWithTwoBreaks(`await page.evaluate(() => window.scrollBy(${deltaX}, ${deltaY}));`);
+    this.pushCodes(`await page.evaluate(() => window.scrollBy(${deltaX}, ${deltaY}));`);
     return this;
   }
 
   fullScreenshot = () => {
-    this.pushActionWithTwoBreaks(`await page.screenshot({ path: 'screenshot.png', fullPage: true });`);
+    this.pushCodes(`await page.screenshot({ path: 'screenshot.png', fullPage: true });`);
     return this;
   }
 
   awaitText = (text: string) => {
-    this.pushActionWithTwoBreaks(`await page.waitForFunction("document.body.innerText.includes('${text}')");`);
+    this.pushCodes(`await page.waitForFunction("document.body.innerText.includes('${text}')");`);
     return this;
   }
 

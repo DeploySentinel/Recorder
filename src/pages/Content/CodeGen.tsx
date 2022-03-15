@@ -102,7 +102,7 @@ export function genCode(
     }`;
 
     if (showComments) {
-      scriptBuilder.pushActionWithOneBreak(`// ${actionDescription}`);
+      scriptBuilder.pushComments(`// ${actionDescription}`);
     }
 
     let bestSelector = null;
