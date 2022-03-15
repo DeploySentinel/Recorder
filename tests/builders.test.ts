@@ -128,6 +128,25 @@ describe('Test builders', () => {
         .mockImplementation(() => 'bar');
     });
 
+    test('pushComments, pushCodes and build', () => {
+      const output = builder
+        .pushComments('// hello-world')
+        .pushCodes("const hellowWorld = () => console.log('hello world')")
+        .build()
+      expect(output).toBe(`const puppeteer = require('puppeteer');
+(async () => {
+  const browser = await puppeteer.launch({
+    // headless: false, slowMo: 100, // Uncomment to visualize test
+  });
+  const page = await browser.newPage();
+
+  // hello-world
+  const hellowWorld = () => console.log('hello world')
+
+  await browser.close();
+})();`);
+    });
+
     test('waitForSelector', () => {
       mockWaitForSelector.mockRestore();
       expect(builder.waitForSelector('foo')).toBe("page.waitForSelector('foo')");
