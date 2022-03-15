@@ -20,7 +20,7 @@ import ActionList from './ActionList';
 import CodeGen, { genCode } from './CodeGen';
 
 import type { Action } from '../types';
-import { ActionsMode } from '../types';
+import { ActionsMode, ActionType } from '../types';
 
 import ControlBarStyle from './ControlBar.css';
 import { endRecording } from '../Common/endRecording';
@@ -192,7 +192,7 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
 
   const rect = hoveredElement?.getBoundingClientRect();
   const displayedSelector = getBestSelectorForAction({
-    type: 'click',
+    type: ActionType.Click,
     tagName: hoveredElement?.tagName ?? '',
     inputType: undefined,
     value: undefined,
