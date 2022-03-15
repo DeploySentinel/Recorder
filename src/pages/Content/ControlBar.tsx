@@ -330,8 +330,7 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
                 )}
               </div>
               <div>
-                {(showScriptType === ScriptType.Playwright ||
-                  showScriptType === ScriptType.Puppeteer) && (
+                {showActionsMode === ActionsMode.Code && (
                   <>
                     <span
                       className="text-sm link-button mb-4 mr-4"
