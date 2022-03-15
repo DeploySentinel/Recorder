@@ -12,6 +12,25 @@ describe('Test builders', () => {
         .mockImplementation(() => 'foo');
     });
 
+    test('pushComments, pushCodes and build', () => {
+      const output = builder
+        .pushComments('// hello-world')
+        .pushCodes("const hellowWorld = () => console.log('hello world')")
+        .build()
+      expect(output).toBe(`const playwright = require('playwright');
+(async () => {
+  const browser = await playwright['chromium'].launch({
+    // headless: false, slowMo: 100, // Uncomment to visualize test
+  });
+  const page = await browser.newPage();
+
+  // hello-world
+  const hellowWorld = () => console.log('hello world')
+
+  await browser.close();
+})();`);
+    });
+
     test('waitForNavigation', () => {
       expect(builder.waitForNavigation()).toBe('page.waitForNavigation()');
     });
@@ -22,59 +41,76 @@ describe('Test builders', () => {
     });
 
     test('click', () => {
-      expect(builder.click('selector', true)).toBe('foo');
+      builder.click('selector', true);
+      expect(builder.getLastestAction()).toBe('\n  foo\n');
       expect(builder.waitForActionAndNavigation).toHaveBeenNthCalledWith(1, "page.click('selector')");
-      expect(builder.click('selector', false).includes("await page.click('selector');"));
+      builder.click('selector', false);
+      expect(builder.getLastestAction()).toBe("\n  await page.click('selector');\n");
     });
 
     test('hover', () => {
-      expect(builder.hover('selector', true)).toBe('foo');
+      builder.hover('selector', true);
+      expect(builder.getLastestAction()).toBe('\n  foo\n');
       expect(builder.waitForActionAndNavigation).toHaveBeenNthCalledWith(1, "page.hover('selector')");
-      expect(builder.hover('selector', false).includes("await page.hover('selector');"));
+      builder.hover('selector', false);
+      expect(builder.getLastestAction()).toBe("\n  await page.hover('selector');\n");
     });
 
     test('load', () => {
-      expect(builder.load('url')).toBe("await page.goto('url');");
+      builder.load('url');
+      expect(builder.getLastestAction()).toBe("\n  await page.goto('url');\n");
     });
 
     test('resize', () => {
-      expect(builder.resize(1, 1)).toBe('await page.setViewportSize({ width: 1, height: 1 });');
+      builder.resize(1, 1);
+      expect(builder.getLastestAction()).toBe('\n  await page.setViewportSize({ width: 1, height: 1 });\n');
     });
     
     test('fill', () => {
-      expect(builder.fill('selector', 'value', true)).toBe('foo');
+      builder.fill('selector', 'value', true);
+      expect(builder.getLastestAction()).toBe('\n  foo\n');
       expect(builder.waitForActionAndNavigation).toHaveBeenNthCalledWith(1, "page.fill('selector', 'value')");
-      expect(builder.fill('selector', false).includes("await page.fill('selector', 'value');"));
+      builder.fill('selector', 'value', false);
+      expect(builder.getLastestAction()).toBe("\n  await page.fill('selector', 'value');\n");
     });
 
     test('type', () => {
-      expect(builder.type('selector', 'value', true)).toBe('foo');
+      builder.type('selector', 'value', true);
+      expect(builder.getLastestAction()).toBe('\n  foo\n');
       expect(builder.waitForActionAndNavigation).toHaveBeenNthCalledWith(1, "page.type('selector', 'value')");
-      expect(builder.type('selector', false).includes("await page.type('selector', 'value');"));
+      builder.type('selector', 'value', false);
+      expect(builder.getLastestAction()).toBe("\n  await page.type('selector', 'value');\n");
     });
 
     test('select', () => {
-      expect(builder.select('selector', 'value', true)).toBe('foo');
+      builder.select('selector', 'value', true);
+      expect(builder.getLastestAction()).toBe('\n  foo\n');
       expect(builder.waitForActionAndNavigation).toHaveBeenNthCalledWith(1, "page.selectOption('selector', 'value')");
-      expect(builder.select('selector', false).includes("await page.selectOption('selector', 'value');"));
+      builder.select('selector', 'value', false);
+      expect(builder.getLastestAction()).toBe("\n  await page.selectOption('selector', 'value');\n");
     });
 
     test('keydown', () => {
-      expect(builder.keydown('selector', 'value', true)).toBe('foo');
+      builder.keydown('selector', 'value', true);
+      expect(builder.getLastestAction()).toBe('\n  foo\n');
       expect(builder.waitForActionAndNavigation).toHaveBeenNthCalledWith(1, "page.press('selector', 'value')");
-      expect(builder.keydown('selector', false).includes("await page.press('selector', 'value');"));
+      builder.keydown('selector', 'value', false);
+      expect(builder.getLastestAction()).toBe("\n  await page.press('selector', 'value');\n");
     });
 
     test('wheel', () => {
-      expect(builder.wheel(1.6, 1.1)).toBe('await page.mouse.wheel(1, 1);');
+      builder.wheel(1.6, 1.1);
+      expect(builder.getLastestAction()).toBe('\n  await page.mouse.wheel(1, 1);\n');
     });
 
     test('fullScreenshot', () => {
-      expect(builder.fullScreenshot()).toBe("await page.screenshot({ path: 'screenshot.png', fullPage: true });");
+      builder.fullScreenshot();
+      expect(builder.getLastestAction()).toBe("\n  await page.screenshot({ path: 'screenshot.png', fullPage: true });\n");
     });
 
     test('awaitText', () => {
-      expect(builder.awaitText('foo')).toBe("await page.waitForSelector('text=foo')");
+      builder.awaitText('foo');
+      expect(builder.getLastestAction()).toBe("\n  await page.waitForSelector('text=foo')\n");
     });
   });
 
@@ -109,64 +145,81 @@ describe('Test builders', () => {
     });
 
     test('click', () => {
-      expect(builder.click('selector', true)).toBe('foo');
+      builder.click('selector', true);
+      expect(builder.getLastestAction()).toBe('\n  foo\n');
       expect(builder.waitForSelectorAndNavigation).toHaveBeenNthCalledWith(1, 'selector', "page.click('selector')");
-      expect(builder.click('selector', false)).toBe("await bar;\n  await page.click('selector');");
+      builder.click('selector', false);
+      expect(builder.getLastestAction()).toBe("\n  await bar;\n  await page.click('selector');\n");
       expect(builder.waitForSelector).toHaveBeenNthCalledWith(1, 'selector');
     });
 
     test('hover', () => {
-      expect(builder.hover('selector', true)).toBe('foo');
+      builder.hover('selector', true);
+      expect(builder.getLastestAction()).toBe('\n  foo\n');
       expect(builder.waitForSelectorAndNavigation).toHaveBeenNthCalledWith(1, 'selector', "page.hover('selector')");
-      expect(builder.hover('selector', false)).toBe("await bar;\n  await page.hover('selector');");
+      builder.hover('selector', false);
+      expect(builder.getLastestAction()).toBe("\n  await bar;\n  await page.hover('selector');\n");
       expect(builder.waitForSelector).toHaveBeenNthCalledWith(1, 'selector');
     });
 
     test('load', () => {
-      expect(builder.load('url')).toBe("await page.goto('url');");
+      builder.load('url');
+      expect(builder.getLastestAction()).toBe("\n  await page.goto('url');\n");
     });
 
     test('resize', () => {
-      expect(builder.resize(1, 1)).toBe('await page.setViewport({ width: 1, height: 1 });');
+      builder.resize(1, 1);
+      expect(builder.getLastestAction()).toBe('\n  await page.setViewport({ width: 1, height: 1 });\n');
     });
 
     test('type', () => {
-      expect(builder.type('selector', 'value', true)).toBe('foo');
+      builder.type('selector', 'value', true);
+      expect(builder.getLastestAction()).toBe('\n  foo\n');
       expect(builder.waitForSelectorAndNavigation).toHaveBeenNthCalledWith(1, 'selector', "page.type('selector', 'value')");
-      expect(builder.type('selector', 'value', false)).toBe("await bar;\n  await page.type('selector', 'value');");
+      builder.type('selector', 'value', false);
+      expect(builder.getLastestAction()).toBe("\n  await bar;\n  await page.type('selector', 'value');\n");
       expect(builder.waitForSelector).toHaveBeenNthCalledWith(1, 'selector');
     });
 
     test('fill', () => {
-      expect(builder.fill('selector', 'value', true)).toBe('foo');
+      builder.fill('selector', 'value', true);
+      expect(builder.getLastestAction()).toBe('\n  foo\n');
       expect(builder.waitForSelectorAndNavigation).toHaveBeenNthCalledWith(1, 'selector:not([disabled])', "page.type('selector', 'value')");
-      expect(builder.fill('selector', 'value', false)).toBe("await bar;\n  await page.type('selector', 'value');");
+      builder.fill('selector', 'value', false);
+      expect(builder.getLastestAction()).toBe("\n  await bar;\n  await page.type('selector', 'value');\n");
       expect(builder.waitForSelector).toHaveBeenNthCalledWith(1, 'selector:not([disabled])');
     });
 
     test('select', () => {
-      expect(builder.select('selector', 'value', true)).toBe('foo');
+      builder.select('selector', 'value', true);
+      expect(builder.getLastestAction()).toBe('\n  foo\n');
       expect(builder.waitForSelectorAndNavigation).toHaveBeenNthCalledWith(1, 'selector', "page.select('selector', 'value')");
-      expect(builder.select('selector', 'value', false)).toBe("await bar;\n  await page.select('selector', 'value');");
+      builder.select('selector', 'value', false);
+      expect(builder.getLastestAction()).toBe("\n  await bar;\n  await page.select('selector', 'value');\n");
       expect(builder.waitForSelector).toHaveBeenNthCalledWith(1, 'selector');
     });
 
     test('keydown', () => {
-      expect(builder.keydown('selector', 'value', true)).toBe('foo');
+      builder.keydown('selector', 'value', true);
+      expect(builder.getLastestAction()).toBe('\n  foo\n');
       expect(builder.waitForSelectorAndNavigation).toHaveBeenNthCalledWith(1, 'selector', "page.keyboard.press('value')");
-      expect(builder.keydown('selector', 'value', false)).toBe("await page.waitForSelector('selector');\n  await page.keyboard.press('value');");
+      builder.keydown('selector', 'value', false);
+      expect(builder.getLastestAction()).toBe("\n  await page.waitForSelector('selector');\n  await page.keyboard.press('value');\n");
     });
 
     test('wheel', () => {
-      expect(builder.wheel(1.6, 1.1)).toBe('await page.evaluate(() => window.scrollBy(1.6, 1.1));');
+      builder.wheel(1.6, 1.1);
+      expect(builder.getLastestAction()).toBe('\n  await page.evaluate(() => window.scrollBy(1.6, 1.1));\n');
     });
 
     test('fullScreenshot', () => {
-      expect(builder.fullScreenshot()).toBe("await page.screenshot({ path: 'screenshot.png', fullPage: true });");
+      builder.fullScreenshot();
+      expect(builder.getLastestAction()).toBe("\n  await page.screenshot({ path: 'screenshot.png', fullPage: true });\n");
     });
 
     test('awaitText', () => {
-      expect(builder.awaitText('foo')).toBe(`await page.waitForFunction("document.body.innerText.includes('foo')");`);
+      builder.awaitText('foo');
+      expect(builder.getLastestAction()).toBe(`\n  await page.waitForFunction("document.body.innerText.includes('foo')");\n`);
     });
   });
 });

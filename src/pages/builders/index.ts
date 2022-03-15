@@ -15,6 +15,8 @@ export abstract class ScriptBuilder {
     return this;
   }
 
+  getLastestAction = () => this.actions[this.actions.length - 1];
+
   abstract click: (selector: string, causesNavigation: boolean) => this;
 
   abstract hover: (selector: string, causesNavigation: boolean) => this;
