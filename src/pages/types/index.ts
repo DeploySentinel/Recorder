@@ -22,6 +22,21 @@ export enum ActionType {
   Wheel = 'wheel',
 }
 
+// (TODO) -> move to utils
+export const isSupportedActionType = (actionType: any) => {
+  return [
+    ActionType.Click,
+    ActionType.Hover,
+    ActionType.Keydown,
+    ActionType.Input,
+    ActionType.Load,
+    ActionType.Resize,
+    ActionType.Wheel,
+    ActionType.FullScreenshot,
+    ActionType.AwaitText,
+  ].includes(actionType);
+}
+
 export class BaseAction {
   type: ActionType;
   tagName: string;
