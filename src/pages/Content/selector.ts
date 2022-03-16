@@ -1,7 +1,7 @@
 import { finder } from '@medv/finder';
 
 import type { Action } from '../types';
-import { ActionType } from '../types';
+import { ActionType, ScriptType } from '../types';
 
 function genAttributeSet(element: HTMLElement, attributes: string[]) {
   return new Set(
@@ -35,6 +35,11 @@ function genSelectorForAttributes(element: HTMLElement, attributes: string[]) {
   } catch (e) {}
 
   return selector;
+}
+
+// isCharacterNumber
+function isCharacterNumber(char: string) {
+  return char.length === 1 && char.match(/[0-9]/);
 }
 
 export default function genSelectors(element: HTMLElement | null) {
@@ -74,12 +79,14 @@ export default function genSelectors(element: HTMLElement | null) {
     'data-qa',
   ]);
 
-  // Certain apps don't have unique ids (ex. youtube)
-  const idSelector = isAttributesDefined(element, ['id'])
-    ? finder(element, {
-        attr: (name) => name === 'id',
-      })
-    : null;
+  // We won't use an id selector if the id is invalid (starts with a number)
+  const idSelector =
+    isAttributesDefined(element, ['id']) && !isCharacterNumber(element.id?.[0])
+      ? // Certain apps don't have unique ids (ex. youtube)
+        finder(element, {
+          attr: (name) => name === 'id',
+        })
+      : null;
   return {
     id: idSelector,
     generalSelector,
@@ -94,11 +101,20 @@ export default function genSelectors(element: HTMLElement | null) {
   };
 }
 
-export function getBestSelectorForAction(action: Action) {
+export function getBestSelectorForAction(action: Action, library: ScriptType) {
   switch (action.type) {
     case ActionType.Click:
     case ActionType.Hover: {
       const selectors = action.selectors;
+      // Only supported for playwright, less than 25 characters, and element only has text inside
+      const textSelector =
+        library === ScriptType.Playwright &&
+        selectors?.text?.length != null &&
+        selectors?.text?.length < 25 &&
+        action.hasOnlyText
+          ? `text=${selectors.text}`
+          : null;
+
       if (action.tagName === 'INPUT') {
         return (
           selectors.testIdSelector ??
@@ -116,6 +132,26 @@ export function getBestSelectorForAction(action: Action) {
           selectors?.id ??
           selectors?.hrefSelector ??
           selectors?.accessibilitySelector ??
+          selectors?.generalSelector ??
+          selectors?.attrSelector ??
+          null
+        );
+      }
+
+      // Prefer text selectors for spans, ems over general selectors
+      if (
+        action.tagName === 'SPAN' ||
+        action.tagName === 'EM' ||
+        action.tagName === 'CITE' ||
+        action.tagName === 'B' ||
+        action.tagName === 'STRONG'
+      ) {
+        return (
+          selectors.testIdSelector ??
+          selectors?.id ??
+          selectors?.accessibilitySelector ??
+          selectors?.hrefSelector ??
+          textSelector ??
           selectors?.generalSelector ??
           selectors?.attrSelector ??
           null

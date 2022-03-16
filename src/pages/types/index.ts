@@ -30,7 +30,8 @@ export class BaseAction {
   selectors: { [key: string]: string | null };
   timestamp: number;
   isPassword: boolean;
-};
+  hasOnlyText: boolean; // If the element only has text content inside (hint to use text selector)
+}
 
 class KeydownAction extends BaseAction {
   type: ActionType.Keydown;
@@ -79,15 +80,16 @@ export class ResizeAction extends BaseAction {
   type: ActionType.Resize;
   width: number;
   height: number;
-};
+}
 
-export type Action = KeydownAction |
-  InputAction |
-  ClickAction |
-  HoverAction |
-  LoadAction |
-  NavigateAction |
-  WheelAction |
-  FullScreenshotAction |
-  AwaitTextAction |
-  ResizeAction;
+export type Action =
+  | KeydownAction
+  | InputAction
+  | ClickAction
+  | HoverAction
+  | LoadAction
+  | NavigateAction
+  | WheelAction
+  | FullScreenshotAction
+  | AwaitTextAction
+  | ResizeAction;

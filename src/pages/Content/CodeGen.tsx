@@ -12,25 +12,25 @@ const truncateText = (str: string, maxLen: number) => {
   return `${str.substring(0, maxLen)}${str.length > maxLen ? '...' : ''}`;
 };
 
-function describeAction(action: Action) {
-
+function describeAction(action: Action, lib: ScriptType) {
   return action?.type === ActionType.Click
     ? `Click on <${action.tagName.toLowerCase()}> ${
         action.selectors.text != null && action.selectors.text.length > 0
           ? `"${truncateText(action.selectors.text.replace('\n', ' '), 25)}"`
-          : getBestSelectorForAction(action)
+          : getBestSelectorForAction(action, lib)
       }`
     : action?.type === ActionType.Hover
     ? `Hover over <${action.tagName.toLowerCase()}> ${
         action.selectors.text != null && action.selectors.text.length > 0
           ? `"${truncateText(action.selectors.text.replace('\n', ' '), 25)}"`
-          : getBestSelectorForAction(action)
+          : getBestSelectorForAction(action, lib)
       }`
     : action?.type === ActionType.Input
     ? `Fill "${
         action.value
       }" on <${action.tagName.toLowerCase()}> ${getBestSelectorForAction(
-        action
+        action,
+        lib
       )}`
     : action?.type == ActionType.Keydown
     ? `Press ${action.key} on ${action.tagName.toLowerCase()}`
@@ -76,12 +76,12 @@ export const isSupportedActionType = (actionType: any) => {
     ActionType.FullScreenshot,
     ActionType.AwaitText,
   ].includes(actionType);
-}
+};
 
 export function genCode(
   actions: Action[],
   showComments: boolean = true,
-  lib: ScriptType = 'playwright' as ScriptType,
+  lib: ScriptType = 'playwright' as ScriptType
 ): string {
   const scriptBuilder =
     lib === 'playwright'
@@ -91,13 +91,13 @@ export function genCode(
   for (let i = 0; i < actions.length; i++) {
     const action = actions[i];
 
-    if (!(isSupportedActionType(action.type))) {
+    if (!isSupportedActionType(action.type)) {
       continue;
     }
 
     const nextAction = actions[i + 1];
     const causesNavigation = nextAction?.type === ActionType.Navigate;
-    const actionDescription = `${describeAction(action)}${
+    const actionDescription = `${describeAction(action, lib)}${
       causesNavigation && lib === 'puppeteer' ? ' and await navigation' : ''
     }`;
 
@@ -114,7 +114,7 @@ export function genCode(
       action.type === ActionType.Keydown ||
       action.type === ActionType.Hover
     ) {
-      bestSelector = getBestSelectorForAction(action);
+      bestSelector = getBestSelectorForAction(action, lib);
       if (bestSelector === null) {
         throw new Error(`Cant generate selector for action ${action}`);
       }

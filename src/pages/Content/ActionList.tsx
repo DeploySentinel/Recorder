@@ -1,5 +1,6 @@
 import React from 'react';
 import { getBestSelectorForAction } from './selector';
+import { ScriptType } from '../types';
 
 import ActionListStyle from './ActionList.css';
 
@@ -25,7 +26,9 @@ function ActionListItem({
           (action.selectors.text?.length ?? -1) < 75 ? (
             <span>"{action.selectors.text}"</span>
           ) : (
-            <span className="mono">{getBestSelectorForAction(action)}</span>
+            <span className="mono">
+              {getBestSelectorForAction(action, ScriptType.Playwright)}
+            </span>
           )}
         </>
       ) : action.type === 'hover' ? (
@@ -38,7 +41,9 @@ function ActionListItem({
           (action.selectors.text?.length ?? -1) < 75 ? (
             <span>"{action.selectors.text}"</span>
           ) : (
-            <span className="mono">{getBestSelectorForAction(action)}</span>
+            <span className="mono">
+              {getBestSelectorForAction(action, ScriptType.Playwright)}
+            </span>
           )}
         </>
       ) : action.type === 'load' ? (
@@ -56,13 +61,18 @@ function ActionListItem({
               : action.value}
             "
           </span>{' '}
-          on <span className="mono">{getBestSelectorForAction(action)}</span>
+          on{' '}
+          <span className="mono">
+            {getBestSelectorForAction(action, ScriptType.Playwright)}
+          </span>
         </>
       ) : action.type === 'keydown' ? (
         <>
           <span className="em-text">Press</span>{' '}
           <span className="mono">"{action.key}"</span> on{' '}
-          <span className="mono">{getBestSelectorForAction(action)}</span>
+          <span className="mono">
+            {getBestSelectorForAction(action, ScriptType.Playwright)}
+          </span>
         </>
       ) : action.type === 'resize' ? (
         <>
@@ -98,7 +108,7 @@ export default function ActionList({ actions }: { actions: Action[] }) {
   return (
     <>
       <style>{ActionListStyle}</style>
-      <div className="ActionList" data-testId="action-list">
+      <div className="ActionList" data-testid="action-list">
         {actions
           .filter((action) =>
             [
