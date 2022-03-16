@@ -323,7 +323,7 @@ export class CypressScriptBuilder extends ScriptBuilder {
   }
 
   awaitText = (text: string) => {
-    this.pushCodes(`cy.get('[text=${text}]').should('be.visible')`);
+    this.pushCodes(`cy.contains('${text}')`);
     return this;
   }
 
