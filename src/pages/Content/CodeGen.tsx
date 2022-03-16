@@ -114,7 +114,6 @@ export function genCode(
         scriptBuilder.hover(bestSelector as string, causesNavigation);
         break;
       case ActionType.Keydown:
-        console.log(action)
         scriptBuilder.keydown(
           bestSelector as string,
           action.key ?? '',
