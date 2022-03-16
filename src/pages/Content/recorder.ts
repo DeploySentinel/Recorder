@@ -50,6 +50,7 @@ function buildBaseAction(
     inputType: target instanceof HTMLInputElement ? target.type : undefined,
     selectors: genSelectors(target) ?? {},
     timestamp: event.timeStamp,
+    hasOnlyText: target.children.length === 0 && target.innerText.length > 0,
     value: undefined,
   };
 }

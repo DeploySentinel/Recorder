@@ -36,7 +36,7 @@ const ActionButton = ({
   label: String;
   testId?: String;
 }) => (
-  <div className="ActionButton" onClick={onClick} data-testId={testId}>
+  <div className="ActionButton" onClick={onClick} data-testid={testId}>
     <div>
       <div
         style={{
@@ -59,11 +59,13 @@ function RenderActionText({ action }: { action: Action }) {
     <>
       {action?.type === 'click'
         ? `Click on ${action.tagName.toLowerCase()} ${getBestSelectorForAction(
-            action
+            action,
+            ScriptType.Playwright
           )}`
         : action.type === 'hover'
         ? `Hover over ${action.tagName.toLowerCase()} ${getBestSelectorForAction(
-            action
+            action,
+            ScriptType.Playwright
           )}`
         : action?.type === 'input'
         ? `Fill "${
@@ -71,7 +73,8 @@ function RenderActionText({ action }: { action: Action }) {
               ? '*'.repeat(action?.value?.length ?? 0)
               : action.value
           }" on ${action.tagName.toLowerCase()} ${getBestSelectorForAction(
-            action
+            action,
+            ScriptType.Playwright
           )}`
         : action?.type == 'keydown'
         ? `Press ${action.key} on ${action.tagName.toLowerCase()}`
@@ -107,8 +110,12 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
   const [actions, setActions] = useState<Action[]>([]);
 
   const [showAllActions, setShowAllActions] = useState<boolean>(false);
-  const [showActionsMode, setShowActionsMode] = useState<ActionsMode>(ActionsMode.Code);
-  const [showScriptType, setScriptType] = useState<ScriptType>(ScriptType.Playwright);
+  const [showActionsMode, setShowActionsMode] = useState<ActionsMode>(
+    ActionsMode.Code
+  );
+  const [showScriptType, setScriptType] = useState<ScriptType>(
+    ScriptType.Playwright
+  );
 
   const [copyCodeConfirm, setCopyCodeConfirm] = useState<boolean>(false);
   const [screenshotConfirm, setScreenshotConfirm] = useState<boolean>(false);
@@ -192,15 +199,21 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
   }, []);
 
   const rect = hoveredElement?.getBoundingClientRect();
-  const displayedSelector = getBestSelectorForAction({
-    type: ActionType.Click,
-    tagName: hoveredElement?.tagName ?? '',
-    inputType: undefined,
-    value: undefined,
-    selectors: hoveredElementSelectors || {},
-    timestamp: 0,
-    isPassword: false,
-  });
+  const displayedSelector = getBestSelectorForAction(
+    {
+      type: ActionType.Click,
+      tagName: hoveredElement?.tagName ?? '',
+      inputType: undefined,
+      value: undefined,
+      selectors: hoveredElementSelectors || {},
+      timestamp: 0,
+      isPassword: false,
+      hasOnlyText:
+        hoveredElement?.children?.length === 0 &&
+        hoveredElement?.innerText?.length > 0,
+    },
+    ScriptType.Playwright
+  );
 
   if (isOpen === false) {
     return <> </>;
@@ -223,7 +236,7 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
           <div className="p-4">
             <div className="d-flex justify-between mb-2">
               <div className="text-xl">
-                <span className="mr-2" data-testId="recording-finished">
+                <span className="mr-2" data-testid="recording-finished">
                   Recording Finished!
                 </span>
                 🎉
@@ -296,16 +309,21 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
               <div className="mb-4">
                 <span
                   className="text-sm link-button mr-2"
-                  data-testId={`show-${
-                    showActionsMode === ActionsMode.Actions ? ActionsMode.Code : ActionsMode.Actions
+                  data-testid={`show-${
+                    showActionsMode === ActionsMode.Actions
+                      ? ActionsMode.Code
+                      : ActionsMode.Actions
                   }`}
                   onClick={() => {
                     setShowActionsMode(
-                      showActionsMode === ActionsMode.Actions ? ActionsMode.Code : ActionsMode.Actions
+                      showActionsMode === ActionsMode.Actions
+                        ? ActionsMode.Code
+                        : ActionsMode.Actions
                     );
                   }}
                 >
-                  Show {showActionsMode === ActionsMode.Actions ? 'Code' : 'Actions'}
+                  Show{' '}
+                  {showActionsMode === ActionsMode.Actions ? 'Code' : 'Actions'}
                 </span>
                 {!isFinished && (
                   <span
@@ -373,8 +391,12 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
               </div>
             </div>
 
-            {showActionsMode === ActionsMode.Code && <CodeGen actions={actions} library={showScriptType} />}
-            {showActionsMode === ActionsMode.Actions && <ActionList actions={actions} />}
+            {showActionsMode === ActionsMode.Code && (
+              <CodeGen actions={actions} library={showScriptType} />
+            )}
+            {showActionsMode === ActionsMode.Actions && (
+              <ActionList actions={actions} />
+            )}
           </div>
         )}
       </div>
