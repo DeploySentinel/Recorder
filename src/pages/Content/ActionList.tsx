@@ -2,9 +2,10 @@ import React from 'react';
 import { getBestSelectorForAction } from './selector';
 import { ScriptType } from '../types';
 
-import ActionListStyle from './ActionList.css';
-
 import type { Action } from '../types';
+import { ActionType, isSupportedActionType } from '../types';
+
+import ActionListStyle from './ActionList.css';
 
 function ActionListItem({
   action,
@@ -16,7 +17,7 @@ function ActionListItem({
   return (
     <div className="ActionListItem">
       <span>{stepNumber}. </span>
-      {action.type === 'click' ? (
+      {action.type === ActionType.Click ? (
         <>
           <span className="em-text">Click</span> on{' '}
           <span className="mono">
@@ -31,7 +32,7 @@ function ActionListItem({
             </span>
           )}
         </>
-      ) : action.type === 'hover' ? (
+      ) : action.type === ActionType.Hover ? (
         <>
           <span className="em-text">Hover</span> over{' '}
           <span className="mono">
@@ -46,12 +47,12 @@ function ActionListItem({
             </span>
           )}
         </>
-      ) : action.type === 'load' ? (
+      ) : action.type === ActionType.Load ? (
         <>
           <span className="em-text">Load</span>{' '}
           <span className="mono">"{action.url}"</span>
         </>
-      ) : action.type === 'input' ? (
+      ) : action.type === ActionType.Input ? (
         <>
           <span className="em-text">Fill</span>{' '}
           <span className="mono">
@@ -66,7 +67,7 @@ function ActionListItem({
             {getBestSelectorForAction(action, ScriptType.Playwright)}
           </span>
         </>
-      ) : action.type === 'keydown' ? (
+      ) : action.type === ActionType.Keydown ? (
         <>
           <span className="em-text">Press</span>{' '}
           <span className="mono">"{action.key}"</span> on{' '}
@@ -74,25 +75,25 @@ function ActionListItem({
             {getBestSelectorForAction(action, ScriptType.Playwright)}
           </span>
         </>
-      ) : action.type === 'resize' ? (
+      ) : action.type === ActionType.Resize ? (
         <>
           <span className="em-text">Resize</span> <span>window to</span>{' '}
           <span className="mono">
             {action.width} x {action.height}
           </span>
         </>
-      ) : action.type === 'wheel' ? (
+      ) : action.type === ActionType.Wheel ? (
         <>
           <span className="em-text">Scroll wheel by </span>{' '}
           <span className="mono">
             X:{action.deltaX}, Y:{action.deltaY}
           </span>
         </>
-      ) : action.type === 'fullScreenshot' ? (
+      ) : action.type === ActionType.FullScreenshot ? (
         <>
           <span className="em-text">Take full page screenshot</span>
         </>
-      ) : action.type === 'awaitText' ? (
+      ) : action.type === ActionType.AwaitText ? (
         <>
           <span className="em-text">Wait for text</span>
           <span>"{action.text}"</span>
@@ -110,19 +111,7 @@ export default function ActionList({ actions }: { actions: Action[] }) {
       <style>{ActionListStyle}</style>
       <div className="ActionList" data-testid="action-list">
         {actions
-          .filter((action) =>
-            [
-              'click',
-              'hover',
-              'input',
-              'keydown',
-              'load',
-              'resize',
-              'wheel',
-              'fullScreenshot',
-              'awaitText',
-            ].includes(action.type)
-          )
+          .filter((action) => isSupportedActionType(action.type))
           .map((action, i) => (
             <ActionListItem
               key={`${action.type}-${i}`}

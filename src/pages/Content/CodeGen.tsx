@@ -6,7 +6,7 @@ import { getBestSelectorForAction } from './selector';
 import { PlaywrightScriptBuilder, PuppeteerScriptBuilder } from '../builders';
 
 import type { Action } from '../types';
-import { ActionType, ScriptType } from '../types';
+import { ActionType, ScriptType, isSupportedActionType } from '../types';
 
 const truncateText = (str: string, maxLen: number) => {
   return `${str.substring(0, maxLen)}${str.length > maxLen ? '...' : ''}`;
@@ -63,20 +63,6 @@ const fillableInputTypes = new Set([
   'month',
   'week',
 ]);
-
-export const isSupportedActionType = (actionType: any) => {
-  return [
-    ActionType.Click,
-    ActionType.Hover,
-    ActionType.Keydown,
-    ActionType.Input,
-    ActionType.Load,
-    ActionType.Resize,
-    ActionType.Wheel,
-    ActionType.FullScreenshot,
-    ActionType.AwaitText,
-  ].includes(actionType);
-};
 
 export function genCode(
   actions: Action[],

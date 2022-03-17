@@ -270,4 +270,64 @@ ${this.actions.join('')}
   };
 }
 
+export class CypressScriptBuilder extends ScriptBuilder {
+  // Cypress automatically detects and waits for the page to finish loading
+  click = (selector: string, causesNavigation: boolean) => {
+    this.pushCodes(`cy.get('${selector}').click()`);
+    return this;
+  }
 
+  hover = (selector: string, causesNavigation: boolean) => {
+    this.pushCodes(`cy.get('${selector}').trigger('mouseover')`);
+    return this;
+  }
+
+  load = (url: string) => {
+    this.pushCodes(`cy.visit('${url}')`);
+    return this;
+  }
+
+  resize = (width: number, height: number) => {
+    this.pushCodes(`cy.viewport(${width}, ${height})`);
+    return this;
+  }
+
+  fill = (selector: string, value: string, causesNavigation: boolean) => {
+    this.pushCodes(`cy.get('${selector}').type('${value}')`);
+    return this;
+  }
+
+  type = (selector: string, value: string, causesNavigation: boolean) => {
+    this.pushCodes(`cy.get('${selector}').type('${value}')`);
+    return this;
+  }
+
+  select = (selector: string, option: string, causesNavigation: boolean) => {
+    this.pushCodes(`cy.get('${selector}').select('${option}')`);
+    return this;
+  }
+
+  keydown = (selector: string, key: string, causesNavigation: boolean) => {
+    this.pushCodes(`cy.get('${selector}').type('{${key}}')`);
+    return this;
+  }
+
+  wheel = (deltaX: number, deltaY: number) => {
+    this.pushCodes(`cy.scrollTo(${Math.floor(deltaX)}, ${Math.floor(deltaY)})`);
+    return this;
+  }
+
+  fullScreenshot = () => {
+    this.pushCodes(`cy.screenshot('screenshot.png')`);
+    return this;
+  }
+
+  awaitText = (text: string) => {
+    this.pushCodes(`cy.contains('${text}')`);
+    return this;
+  }
+
+  build = () => {
+    return `it('Test with DeploySentinel', () => {${this.actions.join('')}})`;
+  }
+}
