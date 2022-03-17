@@ -354,7 +354,7 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
                       className="text-sm link-button mb-4 mr-4"
                       onClick={(e: any) => setScriptType(e.target.value)}
                     >
-                      <select>
+                      <select style={{backgroundColor: 'black', color: 'white', border: 'none', outline: 'none'}}>
                         <option value={ScriptType.Playwright}>Playwright</option>
                         <option value={ScriptType.Puppeteer}>Puppeteer</option>
                         <option value={ScriptType.Cypress}>Cypress</option>

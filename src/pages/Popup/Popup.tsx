@@ -70,7 +70,7 @@ function LastStepPanel({
               className="text-sm link-button"
               onClick={(e: any) => setScriptType(e.target.value)}
             >
-              <select>
+              <select style={{backgroundColor: 'black', border: 'none', outline: 'none'}}>
                 <option value={ScriptType.Playwright}>Playwright</option>
                 <option value={ScriptType.Puppeteer}>Puppeteer</option>
                 <option value={ScriptType.Cypress}>Cypress</option>
