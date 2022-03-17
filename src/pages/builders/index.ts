@@ -29,6 +29,8 @@ export abstract class ScriptBuilder {
 
   abstract type: (selector: string, value: string, causesNavigation: boolean) => this;
 
+  abstract keydown: (selector: string, key: string, causesNavigation: boolean) => this;
+
   abstract select: (selector: string, key: string, causesNavigation: boolean) => this;
 
   abstract wheel: (deltaX: number, deltaY: number) => this;

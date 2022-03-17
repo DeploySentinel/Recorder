@@ -68,14 +68,13 @@ function LastStepPanel({
           <div className="d-flex justify-between items-end mb-4">
             <span
               className="text-sm link-button"
-              onClick={() => {
-                setScriptType(
-                  showScriptType ===  ScriptType.Playwright ? ScriptType.Puppeteer : ScriptType.Playwright
-                );
-              }}
+              onClick={(e: any) => setScriptType(e.target.value)}
             >
-              Switch to{' '}
-              {showScriptType === ScriptType.Playwright ? 'Puppeteer' : 'Playwright'}
+              <select>
+                <option value={ScriptType.Playwright}>Playwright</option>
+                <option value={ScriptType.Puppeteer}>Puppeteer</option>
+                <option value={ScriptType.Cypress}>Cypress</option>
+              </select>
             </span>
             <CopyToClipboard
               text={genCode(actions, true, showScriptType)}
