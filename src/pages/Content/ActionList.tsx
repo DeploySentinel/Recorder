@@ -1,5 +1,6 @@
 import React from 'react';
 import { getBestSelectorForAction } from './selector';
+import { ScriptType } from '../types';
 
 import type { Action } from '../types';
 import { ActionType, isSupportedActionType } from '../types';
@@ -26,7 +27,9 @@ function ActionListItem({
           (action.selectors.text?.length ?? -1) < 75 ? (
             <span>"{action.selectors.text}"</span>
           ) : (
-            <span className="mono">{getBestSelectorForAction(action)}</span>
+            <span className="mono">
+              {getBestSelectorForAction(action, ScriptType.Playwright)}
+            </span>
           )}
         </>
       ) : action.type === ActionType.Hover ? (
@@ -39,7 +42,9 @@ function ActionListItem({
           (action.selectors.text?.length ?? -1) < 75 ? (
             <span>"{action.selectors.text}"</span>
           ) : (
-            <span className="mono">{getBestSelectorForAction(action)}</span>
+            <span className="mono">
+              {getBestSelectorForAction(action, ScriptType.Playwright)}
+            </span>
           )}
         </>
       ) : action.type === ActionType.Load ? (
@@ -57,13 +62,18 @@ function ActionListItem({
               : action.value}
             "
           </span>{' '}
-          on <span className="mono">{getBestSelectorForAction(action)}</span>
+          on{' '}
+          <span className="mono">
+            {getBestSelectorForAction(action, ScriptType.Playwright)}
+          </span>
         </>
       ) : action.type === ActionType.Keydown ? (
         <>
           <span className="em-text">Press</span>{' '}
           <span className="mono">"{action.key}"</span> on{' '}
-          <span className="mono">{getBestSelectorForAction(action)}</span>
+          <span className="mono">
+            {getBestSelectorForAction(action, ScriptType.Playwright)}
+          </span>
         </>
       ) : action.type === ActionType.Resize ? (
         <>
@@ -99,7 +109,7 @@ export default function ActionList({ actions }: { actions: Action[] }) {
   return (
     <>
       <style>{ActionListStyle}</style>
-      <div className="ActionList" data-testId="action-list">
+      <div className="ActionList" data-testid="action-list">
         {actions
           .filter((action) => isSupportedActionType(action.type))
           .map((action, i) => (
