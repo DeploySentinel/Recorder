@@ -3,7 +3,12 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 import { getBestSelectorForAction } from './selector';
-import { CypressScriptBuilder, PlaywrightScriptBuilder, PuppeteerScriptBuilder, ScriptBuilder } from '../builders';
+import {
+  CypressScriptBuilder,
+  PlaywrightScriptBuilder,
+  PuppeteerScriptBuilder,
+  ScriptBuilder,
+} from '../builders';
 
 import type { Action } from '../types';
 import { ActionType, ScriptType, isSupportedActionType } from '../types';
@@ -69,7 +74,6 @@ export function genCode(
   showComments: boolean = true,
   lib: ScriptType = 'playwright' as ScriptType
 ): string {
-
   let scriptBuilder: ScriptBuilder;
 
   switch (lib) {
@@ -168,7 +172,12 @@ export function genCode(
         scriptBuilder.resize(action.width, action.height);
         break;
       case ActionType.Wheel:
-        scriptBuilder.wheel(action.deltaX, action.deltaY);
+        scriptBuilder.wheel(
+          action.deltaX,
+          action.deltaY,
+          action.pageXOffset,
+          action.pageYOffset
+        );
         break;
       case ActionType.FullScreenshot:
         scriptBuilder.fullScreenshot();

@@ -113,7 +113,7 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
   const [showActionsMode, setShowActionsMode] = useState<ActionsMode>(
     ActionsMode.Code
   );
-  const [showScriptType, setScriptType] = useState<ScriptType>(
+  const [scriptType, setScriptType] = useState<ScriptType>(
     ScriptType.Playwright
   );
 
@@ -350,18 +350,31 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
               <div>
                 {showActionsMode === ActionsMode.Code && (
                   <>
-                    <span
-                      className="text-sm link-button mb-4 mr-4"
-                      onClick={(e: any) => setScriptType(e.target.value)}
+                    <select
+                      className="link-button mr-4"
+                      style={{
+                        backgroundColor: 'transparent',
+                        color: 'white',
+                        border: 'none',
+                        outline: 'none',
+                      }}
+                      onChange={(e) =>
+                        setScriptType(e.target.value as ScriptType)
+                      }
+                      value={scriptType}
                     >
-                      <select style={{backgroundColor: 'black', color: 'white', border: 'none', outline: 'none'}}>
-                        <option value={ScriptType.Playwright}>Playwright</option>
-                        <option value={ScriptType.Puppeteer}>Puppeteer</option>
-                        <option value={ScriptType.Cypress}>Cypress</option>
-                      </select>
-                    </span>
+                      <option value={ScriptType.Playwright}>
+                        Playwright Library
+                      </option>
+                      <option value={ScriptType.Puppeteer}>
+                        Puppeteer Library
+                      </option>
+                      <option value={ScriptType.Cypress}>
+                        Cypress Library
+                      </option>
+                    </select>
                     <CopyToClipboard
-                      text={genCode(actions, true, showScriptType)}
+                      text={genCode(actions, true, scriptType)}
                       onCopy={() => {
                         setCopyCodeConfirm(true);
                         setTimeout(() => {
@@ -387,7 +400,7 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
             </div>
 
             {showActionsMode === ActionsMode.Code && (
-              <CodeGen actions={actions} library={showScriptType} />
+              <CodeGen actions={actions} library={scriptType} />
             )}
             {showActionsMode === ActionsMode.Actions && (
               <ActionList actions={actions} />

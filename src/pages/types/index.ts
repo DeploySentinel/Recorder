@@ -35,7 +35,7 @@ export const isSupportedActionType = (actionType: any) => {
     ActionType.FullScreenshot,
     ActionType.AwaitText,
   ].includes(actionType);
-}
+};
 
 export class BaseAction {
   type: ActionType;
@@ -80,6 +80,8 @@ class WheelAction extends BaseAction {
   type: ActionType.Wheel;
   deltaX: number;
   deltaY: number;
+  pageXOffset: number;
+  pageYOffset: number;
 }
 
 class FullScreenshotAction extends BaseAction {

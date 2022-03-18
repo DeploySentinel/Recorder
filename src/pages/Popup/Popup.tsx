@@ -34,8 +34,12 @@ function LastStepPanel({
   actions: Action[];
   onBack: () => void;
 }) {
-  const [showActionsMode, setShowActionsMode] = useState<ActionsMode>(ActionsMode.Code);
-  const [showScriptType, setScriptType] = useState<ScriptType>(ScriptType.Playwright);
+  const [showActionsMode, setShowActionsMode] = useState<ActionsMode>(
+    ActionsMode.Code
+  );
+  const [scriptType, setScriptType] = useState<ScriptType>(
+    ScriptType.Playwright
+  );
   const [copyCodeConfirm, setCopyCodeConfirm] = useState<boolean>(false);
 
   return (
@@ -48,36 +52,48 @@ function LastStepPanel({
       <div className="d-flex justify-between mt-4 items-end text-sm">
         <div className="font-bold text-xl">
           Last Test{' '}
-          {showActionsMode === ActionsMode.Actions ? 'Actions' : 'Generated Code'}
+          {showActionsMode === ActionsMode.Actions
+            ? 'Actions'
+            : 'Generated Code'}
         </div>
         <div>
           <span
             className="link-button"
             onClick={() => {
               setShowActionsMode(
-                showActionsMode === ActionsMode.Actions ? ActionsMode.Code : ActionsMode.Actions
+                showActionsMode === ActionsMode.Actions
+                  ? ActionsMode.Code
+                  : ActionsMode.Actions
               );
             }}
           >
-            Show {showActionsMode === ActionsMode.Actions ? 'Generated Code' : 'Actions'}
+            Show{' '}
+            {showActionsMode === ActionsMode.Actions
+              ? 'Generated Code'
+              : 'Actions'}
           </span>
         </div>
       </div>
       {showActionsMode === ActionsMode.Code && (
         <div className="mt-4">
           <div className="d-flex justify-between items-end mb-4">
-            <span
-              className="text-sm link-button"
-              onClick={(e: any) => setScriptType(e.target.value)}
+            <select
+              className="link-button mr-4"
+              style={{
+                backgroundColor: 'transparent',
+                color: 'white',
+                border: 'none',
+                outline: 'none',
+              }}
+              onChange={(e) => setScriptType(e.target.value as ScriptType)}
+              value={scriptType}
             >
-              <select style={{backgroundColor: 'black', border: 'none', outline: 'none'}}>
-                <option value={ScriptType.Playwright}>Playwright</option>
-                <option value={ScriptType.Puppeteer}>Puppeteer</option>
-                <option value={ScriptType.Cypress}>Cypress</option>
-              </select>
-            </span>
+              <option value={ScriptType.Playwright}>Playwright Library</option>
+              <option value={ScriptType.Puppeteer}>Puppeteer Library</option>
+              <option value={ScriptType.Cypress}>Cypress Library</option>
+            </select>
             <CopyToClipboard
-              text={genCode(actions, true, showScriptType)}
+              text={genCode(actions, true, scriptType)}
               onCopy={() => {
                 setCopyCodeConfirm(true);
                 setTimeout(() => {
@@ -100,7 +116,7 @@ function LastStepPanel({
           </div>
           <CodeGen
             actions={actions}
-            library={showScriptType}
+            library={scriptType}
             styles={{ height: 400 }}
           />
         </div>
