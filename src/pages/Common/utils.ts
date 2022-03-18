@@ -48,6 +48,18 @@ export function localStorageGet(keys: string[]) {
   });
 }
 
+export async function getRandomInstallId() {
+  return localStorageGet(['randomId']).then(({ randomId }) => {
+    let id = randomId;
+    if (randomId == null) {
+      id = `${Math.floor(Math.random() * 1000000)}`;
+      chrome.storage.local.set({ randomId: id });
+    }
+
+    return id;
+  });
+}
+
 export async function getCurrentTab(): Promise<chrome.tabs.Tab> {
   // This is because we're straddling v2 and v3 manifest
   const api = typeof browser === 'object' ? browser : chrome;

@@ -27,6 +27,9 @@ import { ActionsMode, ScriptType } from '../types';
 
 import PopupStyle from './Popup.css';
 
+import { onPageView, onNewRecording } from './analytics';
+onPageView('/popup');
+
 function LastStepPanel({
   actions,
   onBack,
@@ -172,6 +175,8 @@ const Popup = () => {
   }, []);
 
   const onRecordNewTestClick = async () => {
+    onNewRecording();
+
     const currentTab = await getCurrentTab();
     const tabId = currentTab.id;
 
