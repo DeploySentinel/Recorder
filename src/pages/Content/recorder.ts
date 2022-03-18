@@ -161,6 +161,8 @@ class Recorder {
 
     const lastAction = this._recording[this._recording.length - 1];
 
+    const { pageXOffset, pageYOffset } = window;
+
     if (
       lastAction.type === 'wheel' &&
       // We should record a new event if we've changed scroll directions
@@ -170,12 +172,16 @@ class Recorder {
       this.updateLastRecordedAction({
         deltaX: Math.floor(lastAction.deltaX + event.deltaX),
         deltaY: Math.floor(lastAction.deltaY + event.deltaY),
+        pageXOffset,
+        pageYOffset,
       });
     } else {
       const action = {
         type: 'wheel',
         deltaX: Math.floor(event.deltaX),
         deltaY: Math.floor(event.deltaY),
+        pageXOffset,
+        pageYOffset,
       };
       this.appendToRecording(action);
     }
