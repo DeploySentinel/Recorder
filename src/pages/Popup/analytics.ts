@@ -1,8 +1,8 @@
 import { getRandomInstallId } from '../Common/utils';
 
 const ANALYTICS_PATH = 'https://www.google-analytics.com/collect';
-async function postData(url: any, data: any) {
-  await fetch(url, {
+async function postData(url: string, data: URLSearchParams) {
+  return fetch(url, {
     method: 'POST',
     mode: 'no-cors',
     cache: 'no-cache',
@@ -25,7 +25,7 @@ export async function onPageView(pageName: string) {
     gaParams.append('t', 'pageview');
     gaParams.append('dp', pageName);
 
-    postData(ANALYTICS_PATH, gaParams);
+    await postData(ANALYTICS_PATH, gaParams);
   } catch (e) {}
 }
 
@@ -39,6 +39,6 @@ export async function onNewRecording() {
     gaParams.append('ec', 'Recording');
     gaParams.append('ea', 'start');
 
-    postData(ANALYTICS_PATH, gaParams);
+    await postData(ANALYTICS_PATH, gaParams);
   } catch (e) {}
 }
