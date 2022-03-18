@@ -3,7 +3,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 import { getBestSelectorForAction } from './selector';
-import { PlaywrightScriptBuilder, PuppeteerScriptBuilder } from '../builders';
+import { CypressScriptBuilder, PlaywrightScriptBuilder, PuppeteerScriptBuilder, ScriptBuilder } from '../builders';
 
 import type { Action } from '../types';
 import { ActionType, ScriptType, isSupportedActionType } from '../types';
@@ -69,10 +69,22 @@ export function genCode(
   showComments: boolean = true,
   lib: ScriptType = 'playwright' as ScriptType
 ): string {
-  const scriptBuilder =
-    lib === 'playwright'
-      ? new PlaywrightScriptBuilder()
-      : new PuppeteerScriptBuilder();
+
+  let scriptBuilder: ScriptBuilder;
+
+  switch (lib) {
+    case ScriptType.Playwright:
+      scriptBuilder = new PlaywrightScriptBuilder();
+      break;
+    case ScriptType.Puppeteer:
+      scriptBuilder = new PuppeteerScriptBuilder();
+      break;
+    case ScriptType.Cypress:
+      scriptBuilder = new CypressScriptBuilder();
+      break;
+    default:
+      throw new Error('Unsupported script type');
+  }
 
   for (let i = 0; i < actions.length; i++) {
     const action = actions[i];

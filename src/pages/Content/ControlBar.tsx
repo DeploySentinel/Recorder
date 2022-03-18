@@ -352,18 +352,13 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
                   <>
                     <span
                       className="text-sm link-button mb-4 mr-4"
-                      onClick={() => {
-                        setScriptType(
-                          showScriptType === ScriptType.Playwright
-                            ? ScriptType.Puppeteer
-                            : ScriptType.Playwright
-                        );
-                      }}
+                      onClick={(e: any) => setScriptType(e.target.value)}
                     >
-                      Switch to{' '}
-                      {showScriptType === ScriptType.Playwright
-                        ? ScriptType.Puppeteer
-                        : ScriptType.Playwright}
+                      <select style={{backgroundColor: 'black', color: 'white', border: 'none', outline: 'none'}}>
+                        <option value={ScriptType.Playwright}>Playwright</option>
+                        <option value={ScriptType.Puppeteer}>Puppeteer</option>
+                        <option value={ScriptType.Cypress}>Cypress</option>
+                      </select>
                     </span>
                     <CopyToClipboard
                       text={genCode(actions, true, showScriptType)}
