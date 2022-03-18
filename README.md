@@ -3,12 +3,12 @@
 ![Chrome Web Store](https://img.shields.io/chrome-web-store/rating/geggbdbnidkhbnbjoganapfhkpgkndfo?color=8F57F3&label=Chrome%20Rating)
 ![Tests](https://github.com/DeploySentinel/Recorder/actions/workflows/main.yml/badge.svg)
 
-A Browser Extension that generates Playwright and Puppeteer scripts
+A Browser Extension that generates Cypress, Playwright and Puppeteer scripts
 automatically from your browser interactions.
 
 Simply step through your website while recording with DeploySentinel Recorder
-and the extension will convert the captured user flow into a Playwright or
-Puppeteer script.
+and the extension will convert the captured user flow into a Cypress, Playwright
+or Puppeteer script.
 
 [![Chrome Store Icon](assets/ChromeStoreIcon.png)](https://chrome.google.com/webstore/detail/deploysentinel-recorder/geggbdbnidkhbnbjoganapfhkpgkndfo)
 [![Firefox Addon Icon](assets/FirefoxAddonIcon.png)](https://addons.mozilla.org/en-US/firefox/addon/deploysentinel-recorder/)
@@ -21,7 +21,7 @@ Puppeteer script.
 
 - 💻 Automatically capture clicks, keyboard inputs, window resizes, and scroll
   events.
-- 🤖 Generate clean and commented scripts for both Playwright and Puppeteer.
+- 🤖 Generate clean and commented scripts for Cypress, Playwright and Puppeteer.
 - 📋 Preview recording progress and copy generated scripts mid-test to
   clipboard.
 - 📛 Generate element selectors using `id` and `class` as well as other HTML
