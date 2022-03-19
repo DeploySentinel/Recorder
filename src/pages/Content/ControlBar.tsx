@@ -13,14 +13,15 @@ import {
   faChevronDown,
 } from '@fortawesome/free-solid-svg-icons';
 
-import genSelectors, { getBestSelectorForAction } from './selector';
 import Recorder from './recorder';
 import Highlighter from './Highlighter';
 import ActionList from './ActionList';
-import CodeGen, { genCode } from './CodeGen';
+import CodeGen from './CodeGen';
+import genSelectors, { getBestSelectorForAction } from '../builders/selector';
+import { genCode } from '../builders';
 
 import type { Action } from '../types';
-import { ActionType, ActionsMode, ScriptType } from '../types';
+import { ActionType, ActionsMode, ScriptType, TagName } from '../types';
 
 import ControlBarStyle from './ControlBar.css';
 import { endRecording } from '../Common/endRecording';
@@ -202,7 +203,7 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
   const displayedSelector = getBestSelectorForAction(
     {
       type: ActionType.Click,
-      tagName: hoveredElement?.tagName ?? '',
+      tagName: (hoveredElement?.tagName ?? '') as TagName,
       inputType: undefined,
       value: undefined,
       selectors: hoveredElementSelectors || {},

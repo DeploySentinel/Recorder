@@ -1,3 +1,30 @@
+import {
+  ActionType,
+  ScriptType,
+  TagName,
+  isSupportedActionType,
+} from '../types';
+import { getBestSelectorForAction } from './selector';
+
+import type { Action } from '../types';
+
+const FILLABLE_INPUT_TYPES = [
+  '',
+  'date',
+  'datetime',
+  'datetime-local',
+  'email',
+  'month',
+  'number',
+  'password',
+  'search',
+  'tel',
+  'text',
+  'time',
+  'url',
+  'week',
+];
+
 export abstract class ScriptBuilder {
   protected readonly actions: string[];
 
@@ -383,4 +410,164 @@ export class CypressScriptBuilder extends ScriptBuilder {
       ''
     )}})`;
   };
+}
+
+const truncateText = (str: string, maxLen: number) => {
+  return `${str.substring(0, maxLen)}${str.length > maxLen ? '...' : ''}`;
+};
+
+function describeAction(action: Action, lib: ScriptType) {
+  return action?.type === ActionType.Click
+    ? `Click on <${action.tagName.toLowerCase()}> ${
+        action.selectors.text != null && action.selectors.text.length > 0
+          ? `"${truncateText(action.selectors.text.replace('\n', ' '), 25)}"`
+          : getBestSelectorForAction(action, lib)
+      }`
+    : action?.type === ActionType.Hover
+    ? `Hover over <${action.tagName.toLowerCase()}> ${
+        action.selectors.text != null && action.selectors.text.length > 0
+          ? `"${truncateText(action.selectors.text.replace('\n', ' '), 25)}"`
+          : getBestSelectorForAction(action, lib)
+      }`
+    : action?.type === ActionType.Input
+    ? `Fill "${
+        action.value
+      }" on <${action.tagName.toLowerCase()}> ${getBestSelectorForAction(
+        action,
+        lib
+      )}`
+    : action?.type == ActionType.Keydown
+    ? `Press ${action.key} on ${action.tagName.toLowerCase()}`
+    : action?.type == ActionType.Load
+    ? `Load "${action.url}"`
+    : action.type === ActionType.Resize
+    ? `Resize window to ${action.width} x ${action.height}`
+    : action.type === ActionType.Wheel
+    ? `Scroll wheel by X:${action.deltaX}, Y:${action.deltaY}`
+    : action.type === ActionType.FullScreenshot
+    ? `Take full page screenshot`
+    : action.type === ActionType.AwaitText
+    ? `Wait for text "${truncateText(action.text, 25)}" to appear`
+    : '';
+}
+
+export function genCode(
+  actions: Action[],
+  showComments: boolean = true,
+  lib: ScriptType = 'playwright' as ScriptType
+): string {
+  let scriptBuilder: ScriptBuilder;
+
+  switch (lib) {
+    case ScriptType.Playwright:
+      scriptBuilder = new PlaywrightScriptBuilder();
+      break;
+    case ScriptType.Puppeteer:
+      scriptBuilder = new PuppeteerScriptBuilder();
+      break;
+    case ScriptType.Cypress:
+      scriptBuilder = new CypressScriptBuilder();
+      break;
+    default:
+      throw new Error('Unsupported script type');
+  }
+
+  for (let i = 0; i < actions.length; i++) {
+    const action = actions[i];
+
+    if (!isSupportedActionType(action.type)) {
+      continue;
+    }
+
+    const nextAction = actions[i + 1];
+    const causesNavigation = nextAction?.type === ActionType.Navigate;
+    const actionDescription = describeAction(action, lib);
+
+    if (showComments) {
+      scriptBuilder.pushComments(`// ${actionDescription}`);
+    }
+
+    let bestSelector = null;
+
+    // Selector-based actions
+    if (
+      action.type === ActionType.Click ||
+      action.type === ActionType.Input ||
+      action.type === ActionType.Keydown ||
+      action.type === ActionType.Hover
+    ) {
+      bestSelector = getBestSelectorForAction(action, lib);
+      if (bestSelector === null) {
+        throw new Error(`Cant generate selector for action ${action}`);
+      }
+    }
+
+    switch (action.type) {
+      case ActionType.Click:
+        scriptBuilder.click(bestSelector as string, causesNavigation);
+        break;
+      case ActionType.Hover:
+        scriptBuilder.hover(bestSelector as string, causesNavigation);
+        break;
+      case ActionType.Keydown:
+        scriptBuilder.keydown(
+          bestSelector as string,
+          action.key ?? '',
+          causesNavigation
+        );
+        break;
+      case ActionType.Input: {
+        if (action.tagName === TagName.Select) {
+          scriptBuilder.select(
+            bestSelector as string,
+            action.value ?? '',
+            causesNavigation
+          );
+        } else if (
+          // If the input is "fillable" or a text area
+          (action.tagName === TagName.Input &&
+            action.inputType != null &&
+            FILLABLE_INPUT_TYPES.includes(action.inputType)) ||
+          action.tagName === TagName.TextArea
+        ) {
+          // Do more actionability checks
+          scriptBuilder.fill(
+            bestSelector as string,
+            action.value ?? '',
+            causesNavigation
+          );
+        } else {
+          scriptBuilder.type(
+            bestSelector as string,
+            action.value ?? '',
+            causesNavigation
+          );
+        }
+        break;
+      }
+      case ActionType.Load:
+        scriptBuilder.load(action.url);
+        break;
+      case ActionType.Resize:
+        scriptBuilder.resize(action.width, action.height);
+        break;
+      case ActionType.Wheel:
+        scriptBuilder.wheel(
+          action.deltaX,
+          action.deltaY,
+          action.pageXOffset,
+          action.pageYOffset
+        );
+        break;
+      case ActionType.FullScreenshot:
+        scriptBuilder.fullScreenshot();
+        break;
+      case ActionType.AwaitText:
+        scriptBuilder.awaitText(action.text);
+        break;
+      default:
+        break;
+    }
+  }
+  return scriptBuilder.build();
 }

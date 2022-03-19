@@ -1,7 +1,7 @@
-import { finder } from '@medv/finder';
+import finder from './finder';
 
 import type { Action } from '../types';
-import { ActionType, ScriptType } from '../types';
+import { ActionType, ScriptType, TagName } from '../types';
 
 function genAttributeSet(element: HTMLElement, attributes: string[]) {
   return new Set(
@@ -115,7 +115,7 @@ export function getBestSelectorForAction(action: Action, library: ScriptType) {
           ? `text=${selectors.text}`
           : null;
 
-      if (action.tagName === 'INPUT') {
+      if (action.tagName === TagName.Input) {
         return (
           selectors.testIdSelector ??
           selectors?.id ??
@@ -126,7 +126,7 @@ export function getBestSelectorForAction(action: Action, library: ScriptType) {
           null
         );
       }
-      if (action.tagName === 'A') {
+      if (action.tagName === TagName.A) {
         return (
           selectors.testIdSelector ??
           selectors?.id ??
@@ -140,11 +140,11 @@ export function getBestSelectorForAction(action: Action, library: ScriptType) {
 
       // Prefer text selectors for spans, ems over general selectors
       if (
-        action.tagName === 'SPAN' ||
-        action.tagName === 'EM' ||
-        action.tagName === 'CITE' ||
-        action.tagName === 'B' ||
-        action.tagName === 'STRONG'
+        action.tagName === TagName.Span ||
+        action.tagName === TagName.EM ||
+        action.tagName === TagName.Cite ||
+        action.tagName === TagName.B ||
+        action.tagName === TagName.Strong
       ) {
         return (
           selectors.testIdSelector ??

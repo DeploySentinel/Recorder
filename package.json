@@ -9,14 +9,14 @@
     "start-chrome": "MANIFEST_VERSION=3 node utils/webserver.js",
     "start-ff": "MANIFEST_VERSION=2 node utils/webserver.js",
     "bundle-source": "zip source.zip -r ./* -x ./node_modules/\\* -x .git/\\* -x .vscode/\\* -x \\*.log",
-    "test": "jest"
+    "test": "jest --coverage",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
     "@fortawesome/react-fontawesome": "^0.1.15",
     "@hot-loader/react-dom": "^17.0.1",
-    "@medv/finder": "^2.0.0",
     "@types/chrome": "^0.0.154",
     "@types/firefox": "^0.0.31",
     "@types/lodash.debounce": "^4.0.6",
@@ -56,7 +56,9 @@
     "fs-extra": "^9.1.0",
     "html-loader": "^2.1.0",
     "html-webpack-plugin": "^5.2.0",
+    "husky": "^7.0.4",
     "jest": "^27.3.1",
+    "lint-staged": "^12.3.7",
     "loader": "^2.1.1",
     "playwright": "^1.16.3",
     "prettier": "^2.2.1",
@@ -66,9 +68,13 @@
     "to-string": "^0.2.0",
     "ts-jest": "^27.0.7",
     "ts-loader": "^8.0.17",
+    "ts-node": "^10.7.0",
     "typescript": "^4.1.5",
     "webpack": "^5.23.0",
     "webpack-cli": "^4.5.0",
     "webpack-dev-server": "^3.11.2"
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
   }
 }

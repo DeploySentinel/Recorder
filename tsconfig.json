@@ -14,7 +14,8 @@
     "resolveJsonModule": true,
     "noEmit": false,
     "jsx": "react",
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    "downlevelIteration": true
   },
   "include": ["src"],
   "exclude": ["build", "node_modules"]

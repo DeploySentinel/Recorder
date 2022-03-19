@@ -1,5 +1,5 @@
 import { setEndRecordingStorage, localStorageGet } from './utils';
-import { genCode } from '../Content/CodeGen';
+import { genCode } from '../builders';
 
 export async function endRecording() {
   const { recording, returnTabId } = await localStorageGet([

@@ -11,9 +11,10 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 import Logo from '../Common/Logo';
-import CodeGen, { genCode } from '../Content/CodeGen';
+import CodeGen from '../Content/CodeGen';
 import ActionList from '../Content/ActionList';
 import { endRecording } from '../Common/endRecording';
+import { genCode } from '../builders';
 import {
   setStartRecordingStorage,
   localStorageGet,

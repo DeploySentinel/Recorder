@@ -22,6 +22,18 @@ export enum ActionType {
   Wheel = 'wheel',
 }
 
+export enum TagName {
+  A = 'A',
+  B = 'B',
+  Cite = 'CITE',
+  EM = 'EM',
+  Input = 'INPUT',
+  Select = 'SELECT',
+  Span = 'SPAN',
+  Strong = 'STRONG',
+  TextArea = 'TEXTAREA',
+}
+
 // (TODO) -> move to utils
 export const isSupportedActionType = (actionType: any) => {
   return [
@@ -39,7 +51,7 @@ export const isSupportedActionType = (actionType: any) => {
 
 export class BaseAction {
   type: ActionType;
-  tagName: string;
+  tagName: TagName;
   inputType: string | undefined;
   value: string | undefined;
   selectors: { [key: string]: string | null };
