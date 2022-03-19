@@ -1,12 +1,12 @@
+import { getBestSelectorForAction } from './selector';
+
+import type { Action } from '../types';
 import {
   ActionType,
   ScriptType,
   TagName,
   isSupportedActionType,
 } from '../types';
-import { getBestSelectorForAction } from './selector';
-
-import type { Action } from '../types';
 
 const FILLABLE_INPUT_TYPES = [
   '',
@@ -416,7 +416,7 @@ const truncateText = (str: string, maxLen: number) => {
   return `${str.substring(0, maxLen)}${str.length > maxLen ? '...' : ''}`;
 };
 
-function describeAction(action: Action, lib: ScriptType) {
+const describeAction = (action: Action, lib: ScriptType) => {
   return action?.type === ActionType.Click
     ? `Click on <${action.tagName.toLowerCase()}> ${
         action.selectors.text != null && action.selectors.text.length > 0
@@ -449,13 +449,13 @@ function describeAction(action: Action, lib: ScriptType) {
     : action.type === ActionType.AwaitText
     ? `Wait for text "${truncateText(action.text, 25)}" to appear`
     : '';
-}
+};
 
-export function genCode(
+export const genCode = (
   actions: Action[],
-  showComments: boolean = true,
-  lib: ScriptType = 'playwright' as ScriptType
-): string {
+  showComments: boolean,
+  lib: ScriptType
+): string => {
   let scriptBuilder: ScriptBuilder;
 
   switch (lib) {
@@ -481,9 +481,9 @@ export function genCode(
 
     const nextAction = actions[i + 1];
     const causesNavigation = nextAction?.type === ActionType.Navigate;
-    const actionDescription = describeAction(action, lib);
 
     if (showComments) {
+      const actionDescription = describeAction(action, lib);
       scriptBuilder.pushComments(`// ${actionDescription}`);
     }
 
@@ -570,4 +570,4 @@ export function genCode(
     }
   }
   return scriptBuilder.build();
-}
+};
