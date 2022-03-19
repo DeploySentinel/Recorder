@@ -1,4 +1,4 @@
-import { finder } from '@medv/finder';
+import finder from './finder';
 
 import type { Action } from '../types';
 import { ActionType, ScriptType, TagName } from '../types';
