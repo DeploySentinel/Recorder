@@ -1,4 +1,9 @@
-import { ActionType, ScriptType, TagName, isSupportedActionType } from '../types';
+import {
+  ActionType,
+  ScriptType,
+  TagName,
+  isSupportedActionType,
+} from '../types';
 import { getBestSelectorForAction } from './selector';
 
 import type { Action } from '../types';
@@ -496,10 +501,6 @@ export function genCode(
         throw new Error(`Cant generate selector for action ${action}`);
       }
     }
-
-    console.log('@@@@@@@@@@2');
-    console.log(action);
-    console.log('@@@@@@@@@@2');
 
     switch (action.type) {
       case ActionType.Click:
