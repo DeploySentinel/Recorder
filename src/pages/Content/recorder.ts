@@ -1,8 +1,9 @@
-import genSelectors from './selector';
-import { localStorageGet } from '../Common/utils';
 import debounce from 'lodash.debounce';
 
-import { ActionType, BaseAction, ResizeAction } from '../types';
+import genSelectors from '../builders/selector';
+import { localStorageGet } from '../Common/utils';
+
+import { ActionType, BaseAction, ResizeAction, TagName } from '../types';
 
 function isEventFromOverlay(event: Event) {
   return (
@@ -46,7 +47,7 @@ function buildBaseAction(
       target instanceof HTMLInputElement &&
       target.type.toLowerCase() === 'password',
     type: event.type as ActionType,
-    tagName: target.tagName,
+    tagName: target.tagName as TagName,
     inputType: target instanceof HTMLInputElement ? target.type : undefined,
     selectors: genSelectors(target) ?? {},
     timestamp: event.timeStamp,

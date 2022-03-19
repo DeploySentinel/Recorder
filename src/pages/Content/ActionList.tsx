@@ -1,9 +1,10 @@
 import React from 'react';
-import { getBestSelectorForAction } from './selector';
-import { ScriptType } from '../types';
+
+import { ActionType, isSupportedActionType } from '../types';
+import { getBestSelectorForAction } from '../builders/selector';
 
 import type { Action } from '../types';
-import { ActionType, isSupportedActionType } from '../types';
+import { ScriptType } from '../types';
 
 import ActionListStyle from './ActionList.css';
 
