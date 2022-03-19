@@ -3,22 +3,22 @@ import { getBestSelectorForAction } from './selector';
 
 import type { Action } from '../types';
 
-const fillableInputTypes = new Set([
+const FILLABLE_INPUT_TYPES = [
   '',
+  'date',
+  'datetime',
+  'datetime-local',
   'email',
+  'month',
   'number',
   'password',
   'search',
   'tel',
   'text',
-  'url',
-  'date',
   'time',
-  'datetime',
-  'datetime-local',
-  'month',
+  'url',
   'week',
-]);
+];
 
 export abstract class ScriptBuilder {
   protected readonly actions: string[];
@@ -526,7 +526,7 @@ export function genCode(
           // If the input is "fillable" or a text area
           (action.tagName === TagName.Input &&
             action.inputType != null &&
-            fillableInputTypes.has(action.inputType)) ||
+            FILLABLE_INPUT_TYPES.includes(action.inputType)) ||
           action.tagName === TagName.TextArea
         ) {
           // Do more actionability checks
