@@ -83,7 +83,7 @@ function LastStepPanel({
             <select
               className="link-button mr-4"
               style={{
-                backgroundColor: 'transparent',
+                backgroundColor: '#080a0b',
                 color: 'white',
                 border: 'none',
                 outline: 'none',
