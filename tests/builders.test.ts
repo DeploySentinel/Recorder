@@ -2,9 +2,16 @@ import {
   CypressScriptBuilder,
   PlaywrightScriptBuilder,
   PuppeteerScriptBuilder,
+  truncateText,
 } from '../src/pages/builders';
 
 describe('Test builders', () => {
+  test('truncateText', () => {
+    expect(truncateText('hello', 10)).toBe('hello');
+    expect(truncateText('hello', 2)).toBe('he...');
+    expect(truncateText('hello', 0)).toBe('...');
+  });
+
   describe('CypressScriptBuilder', () => {
     let builder: any;
     let mockPushCodes: any;
