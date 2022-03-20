@@ -3,6 +3,7 @@ import { getBestSelectorForAction } from './selector';
 import type { Action } from '../types';
 import {
   ActionType,
+  BaseAction,
   ScriptType,
   TagName,
   isSupportedActionType,
@@ -25,24 +26,128 @@ const FILLABLE_INPUT_TYPES = [
   'week',
 ];
 
-export abstract class ScriptBuilder {
-  protected readonly actions: string[];
+// only used in ActionContext
+export const truncateText = (str: string, maxLen: number) => {
+  return `${str.substring(0, maxLen)}${str.length > maxLen ? '...' : ''}`;
+};
 
-  constructor() {
-    this.actions = [];
+type ActionState = {
+  causesNavigation: boolean;
+};
+
+export class ActionContext extends BaseAction {
+  private readonly action: Action;
+
+  private readonly scriptType: ScriptType;
+
+  private readonly actionState: ActionState;
+
+  constructor(
+    action: Action,
+    scriptType: ScriptType,
+    actionState: ActionState
+  ) {
+    super();
+    this.action = action;
+    this.actionState = actionState;
+    this.scriptType = scriptType;
+  }
+
+  getType() {
+    return this.action.type;
+  }
+
+  getTagName() {
+    return this.action.tagName;
+  }
+
+  getValue() {
+    return this.action.value;
+  }
+
+  getInputType() {
+    return this.action.inputType;
+  }
+
+  // (FIXME: shouldn't expose action)
+  getAction() {
+    return this.action;
+  }
+
+  getActionState() {
+    return this.actionState;
+  }
+
+  getDescription() {
+    const { type, selectors, tagName, value } = this.action;
+
+    switch (type) {
+      case ActionType.Click:
+        return `Click on <${tagName.toLowerCase()}> ${
+          selectors.text != null && selectors.text.length > 0
+            ? `"${truncateText(selectors.text.replace('\n', ' '), 25)}"`
+            : getBestSelectorForAction(this.action, this.scriptType)
+        }`;
+      case ActionType.Hover:
+        return `Hover over <${tagName.toLowerCase()}> ${
+          selectors.text != null && selectors.text.length > 0
+            ? `"${truncateText(selectors.text.replace('\n', ' '), 25)}"`
+            : getBestSelectorForAction(this.action, this.scriptType)
+        }`;
+      case ActionType.Input:
+        return `Fill "${value}" on <${tagName.toLowerCase()}> ${getBestSelectorForAction(
+          this.action,
+          this.scriptType
+        )}`;
+      case ActionType.Keydown:
+        return `Press ${this.action.key} on ${tagName.toLowerCase()}`;
+      case ActionType.Load:
+        return `Load "${this.action.url}"`;
+      case ActionType.Resize:
+        return `Resize window to ${this.action.width} x ${this.action.height}`;
+      case ActionType.Wheel:
+        return `Scroll wheel by X:${this.action.deltaX}, Y:${this.action.deltaY}`;
+      case ActionType.FullScreenshot:
+        return `Take full page screenshot`;
+      case ActionType.AwaitText:
+        return `Wait for text "${truncateText(
+          this.action.text,
+          25
+        )}" to appear`;
+      default:
+        return '';
+    }
+  }
+
+  getBestSelector(): string | null {
+    return getBestSelectorForAction(this.action, this.scriptType);
+  }
+}
+
+export abstract class ScriptBuilder {
+  protected readonly codes: string[];
+
+  protected readonly actionContexts: ActionContext[];
+
+  protected readonly showComments: boolean;
+
+  constructor(showComments: boolean) {
+    this.codes = [];
+    this.actionContexts = [];
+    this.showComments = showComments;
   }
 
   pushComments = (comments: string) => {
-    this.actions.push(`\n  ${comments}`);
+    this.codes.push(`\n  ${comments}`);
     return this;
   };
 
   pushCodes = (codes: string) => {
-    this.actions.push(`\n  ${codes}\n`);
+    this.codes.push(`\n  ${codes}\n`);
     return this;
   };
 
-  getLastestAction = () => this.actions[this.actions.length - 1];
+  getLastestCode = () => this.codes[this.codes.length - 1];
 
   abstract click: (selector: string, causesNavigation: boolean) => this;
 
@@ -88,6 +193,78 @@ export abstract class ScriptBuilder {
   abstract awaitText: (test: string) => this;
 
   abstract build: () => string;
+
+  transformActionIntoCodes = (actionContext: ActionContext) => {
+    this.actionContexts.push(actionContext);
+
+    if (this.showComments) {
+      const actionDescription = actionContext.getDescription();
+      this.pushComments(`// ${actionDescription}`);
+    }
+
+    const bestSelector = actionContext.getBestSelector();
+    const tagName = actionContext.getTagName();
+    const value = actionContext.getValue();
+    const inputType = actionContext.getInputType();
+    const { causesNavigation } = actionContext.getActionState();
+    // (FIXME: getters for special fields)
+    const action: any = actionContext.getAction();
+
+    switch (actionContext.getType()) {
+      case ActionType.Click:
+        this.click(bestSelector as string, causesNavigation);
+        break;
+      case ActionType.Hover:
+        this.hover(bestSelector as string, causesNavigation);
+        break;
+      case ActionType.Keydown:
+        this.keydown(
+          bestSelector as string,
+          action.key ?? '',
+          causesNavigation
+        );
+        break;
+      case ActionType.Input: {
+        if (tagName === TagName.Select) {
+          this.select(bestSelector as string, value ?? '', causesNavigation);
+        } else if (
+          // If the input is "fillable" or a text area
+          (tagName === TagName.Input &&
+            inputType != null &&
+            FILLABLE_INPUT_TYPES.includes(inputType)) ||
+          tagName === TagName.TextArea
+        ) {
+          // Do more actionability checks
+          this.fill(bestSelector as string, value ?? '', causesNavigation);
+        } else {
+          this.type(bestSelector as string, value ?? '', causesNavigation);
+        }
+        break;
+      }
+      case ActionType.Load:
+        this.load(action.url);
+        break;
+      case ActionType.Resize:
+        this.resize(action.width, action.height);
+        break;
+      case ActionType.Wheel:
+        this.wheel(
+          action.deltaX,
+          action.deltaY,
+          action.pageXOffset,
+          action.pageYOffset
+        );
+        break;
+      case ActionType.FullScreenshot:
+        this.fullScreenshot();
+        break;
+      case ActionType.AwaitText:
+        this.awaitText(action.text);
+        break;
+      default:
+        break;
+    }
+  };
 }
 
 export class PlaywrightScriptBuilder extends ScriptBuilder {
@@ -191,7 +368,7 @@ export class PlaywrightScriptBuilder extends ScriptBuilder {
     // headless: false, slowMo: 100, // Uncomment to visualize test
   });
   const page = await browser.newPage();
-${this.actions.join('')}
+${this.codes.join('')}
   await browser.close();
 })();`;
   };
@@ -269,7 +446,7 @@ export class PuppeteerScriptBuilder extends ScriptBuilder {
           pageType
         )
       );
-    } else {
+      // Do more actionability checks
       this.pushCodes(
         `await ${this.waitForSelector(
           `${selector}:not([disabled])`
@@ -333,7 +510,7 @@ export class PuppeteerScriptBuilder extends ScriptBuilder {
     // headless: false, slowMo: 100, // Uncomment to visualize test
   });
   const page = await browser.newPage();
-${this.actions.join('')}
+${this.codes.join('')}
   await browser.close();
 })();`;
   };
@@ -406,67 +583,28 @@ export class CypressScriptBuilder extends ScriptBuilder {
   };
 
   build = () => {
-    return `it('Written with DeploySentinel Recorder', () => {${this.actions.join(
+    return `it('Written with DeploySentinel Recorder', () => {${this.codes.join(
       ''
     )}})`;
   };
 }
 
-const truncateText = (str: string, maxLen: number) => {
-  return `${str.substring(0, maxLen)}${str.length > maxLen ? '...' : ''}`;
-};
-
-const describeAction = (action: Action, lib: ScriptType) => {
-  return action?.type === ActionType.Click
-    ? `Click on <${action.tagName.toLowerCase()}> ${
-        action.selectors.text != null && action.selectors.text.length > 0
-          ? `"${truncateText(action.selectors.text.replace('\n', ' '), 25)}"`
-          : getBestSelectorForAction(action, lib)
-      }`
-    : action?.type === ActionType.Hover
-    ? `Hover over <${action.tagName.toLowerCase()}> ${
-        action.selectors.text != null && action.selectors.text.length > 0
-          ? `"${truncateText(action.selectors.text.replace('\n', ' '), 25)}"`
-          : getBestSelectorForAction(action, lib)
-      }`
-    : action?.type === ActionType.Input
-    ? `Fill "${
-        action.value
-      }" on <${action.tagName.toLowerCase()}> ${getBestSelectorForAction(
-        action,
-        lib
-      )}`
-    : action?.type == ActionType.Keydown
-    ? `Press ${action.key} on ${action.tagName.toLowerCase()}`
-    : action?.type == ActionType.Load
-    ? `Load "${action.url}"`
-    : action.type === ActionType.Resize
-    ? `Resize window to ${action.width} x ${action.height}`
-    : action.type === ActionType.Wheel
-    ? `Scroll wheel by X:${action.deltaX}, Y:${action.deltaY}`
-    : action.type === ActionType.FullScreenshot
-    ? `Take full page screenshot`
-    : action.type === ActionType.AwaitText
-    ? `Wait for text "${truncateText(action.text, 25)}" to appear`
-    : '';
-};
-
 export const genCode = (
   actions: Action[],
   showComments: boolean,
-  lib: ScriptType
+  scriptType: ScriptType
 ): string => {
   let scriptBuilder: ScriptBuilder;
 
-  switch (lib) {
+  switch (scriptType) {
     case ScriptType.Playwright:
-      scriptBuilder = new PlaywrightScriptBuilder();
+      scriptBuilder = new PlaywrightScriptBuilder(showComments);
       break;
     case ScriptType.Puppeteer:
-      scriptBuilder = new PuppeteerScriptBuilder();
+      scriptBuilder = new PuppeteerScriptBuilder(showComments);
       break;
     case ScriptType.Cypress:
-      scriptBuilder = new CypressScriptBuilder();
+      scriptBuilder = new CypressScriptBuilder(showComments);
       break;
     default:
       throw new Error('Unsupported script type');
@@ -482,92 +620,11 @@ export const genCode = (
     const nextAction = actions[i + 1];
     const causesNavigation = nextAction?.type === ActionType.Navigate;
 
-    if (showComments) {
-      const actionDescription = describeAction(action, lib);
-      scriptBuilder.pushComments(`// ${actionDescription}`);
-    }
-
-    let bestSelector = null;
-
-    // Selector-based actions
-    if (
-      action.type === ActionType.Click ||
-      action.type === ActionType.Input ||
-      action.type === ActionType.Keydown ||
-      action.type === ActionType.Hover
-    ) {
-      bestSelector = getBestSelectorForAction(action, lib);
-      if (bestSelector === null) {
-        throw new Error(`Cant generate selector for action ${action}`);
-      }
-    }
-
-    switch (action.type) {
-      case ActionType.Click:
-        scriptBuilder.click(bestSelector as string, causesNavigation);
-        break;
-      case ActionType.Hover:
-        scriptBuilder.hover(bestSelector as string, causesNavigation);
-        break;
-      case ActionType.Keydown:
-        scriptBuilder.keydown(
-          bestSelector as string,
-          action.key ?? '',
-          causesNavigation
-        );
-        break;
-      case ActionType.Input: {
-        if (action.tagName === TagName.Select) {
-          scriptBuilder.select(
-            bestSelector as string,
-            action.value ?? '',
-            causesNavigation
-          );
-        } else if (
-          // If the input is "fillable" or a text area
-          (action.tagName === TagName.Input &&
-            action.inputType != null &&
-            FILLABLE_INPUT_TYPES.includes(action.inputType)) ||
-          action.tagName === TagName.TextArea
-        ) {
-          // Do more actionability checks
-          scriptBuilder.fill(
-            bestSelector as string,
-            action.value ?? '',
-            causesNavigation
-          );
-        } else {
-          scriptBuilder.type(
-            bestSelector as string,
-            action.value ?? '',
-            causesNavigation
-          );
-        }
-        break;
-      }
-      case ActionType.Load:
-        scriptBuilder.load(action.url);
-        break;
-      case ActionType.Resize:
-        scriptBuilder.resize(action.width, action.height);
-        break;
-      case ActionType.Wheel:
-        scriptBuilder.wheel(
-          action.deltaX,
-          action.deltaY,
-          action.pageXOffset,
-          action.pageYOffset
-        );
-        break;
-      case ActionType.FullScreenshot:
-        scriptBuilder.fullScreenshot();
-        break;
-      case ActionType.AwaitText:
-        scriptBuilder.awaitText(action.text);
-        break;
-      default:
-        break;
-    }
+    scriptBuilder.transformActionIntoCodes(
+      new ActionContext(action, scriptType, {
+        causesNavigation,
+      })
+    );
   }
   return scriptBuilder.build();
 };
