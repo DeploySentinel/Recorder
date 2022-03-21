@@ -147,7 +147,7 @@ export abstract class ScriptBuilder {
     return this;
   };
 
-  getLastestCode = () => this.codes[this.codes.length - 1];
+  getLatestCode = () => this.codes[this.codes.length - 1];
 
   abstract click: (selector: string, causesNavigation: boolean) => this;
 
@@ -446,6 +446,7 @@ export class PuppeteerScriptBuilder extends ScriptBuilder {
           pageType
         )
       );
+    } else {
       // Do more actionability checks
       this.pushCodes(
         `await ${this.waitForSelector(
