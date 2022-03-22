@@ -27,7 +27,7 @@ describe('Test builders', () => {
       const output = builder
         .pushComments('// hello-world')
         .pushCodes('cy.visit()')
-        .build();
+        .buildScript();
       expect(output).toBe(
         `it('Written with DeploySentinel Recorder', () => {\n  // hello-world\n  cy.visit()\n})`
       );
@@ -63,7 +63,7 @@ describe('Test builders', () => {
       builder.fill('selector', 'value', true);
       expect(mockPushCodes).toHaveBeenNthCalledWith(
         1,
-        "cy.get('selector').type('value')"
+        'cy.get(\'selector\').type("value")'
       );
     });
 
@@ -71,7 +71,7 @@ describe('Test builders', () => {
       builder.type('selector', 'value', true);
       expect(mockPushCodes).toHaveBeenNthCalledWith(
         1,
-        "cy.get('selector').type('value')"
+        'cy.get(\'selector\').type("value")'
       );
     });
 
@@ -123,7 +123,7 @@ describe('Test builders', () => {
       const output = builder
         .pushComments('// hello-world')
         .pushCodes("const hellowWorld = () => console.log('hello world')")
-        .build();
+        .buildScript();
       expect(output).toBe(`const playwright = require('playwright');
 (async () => {
   const browser = await playwright['chromium'].launch({
@@ -192,11 +192,11 @@ describe('Test builders', () => {
       expect(builder.getLatestCode()).toBe('\n  foo\n');
       expect(builder.waitForActionAndNavigation).toHaveBeenNthCalledWith(
         1,
-        "page.fill('selector', 'value')"
+        'page.fill(\'selector\', "value")'
       );
       builder.fill('selector', 'value', false);
       expect(builder.getLatestCode()).toBe(
-        "\n  await page.fill('selector', 'value');\n"
+        '\n  await page.fill(\'selector\', "value");\n'
       );
     });
 
@@ -205,11 +205,11 @@ describe('Test builders', () => {
       expect(builder.getLatestCode()).toBe('\n  foo\n');
       expect(builder.waitForActionAndNavigation).toHaveBeenNthCalledWith(
         1,
-        "page.type('selector', 'value')"
+        'page.type(\'selector\', "value")'
       );
       builder.type('selector', 'value', false);
       expect(builder.getLatestCode()).toBe(
-        "\n  await page.type('selector', 'value');\n"
+        '\n  await page.type(\'selector\', "value");\n'
       );
     });
 
@@ -281,7 +281,7 @@ describe('Test builders', () => {
       const output = builder
         .pushComments('// hello-world')
         .pushCodes("const hellowWorld = () => console.log('hello world')")
-        .build();
+        .buildScript();
       expect(output).toBe(`const puppeteer = require('puppeteer');
 (async () => {
   const browser = await puppeteer.launch({
@@ -363,11 +363,11 @@ describe('Test builders', () => {
       expect(builder.waitForSelectorAndNavigation).toHaveBeenNthCalledWith(
         1,
         'selector',
-        "page.type('selector', 'value')"
+        'page.type(\'selector\', "value")'
       );
       builder.type('selector', 'value', false);
       expect(builder.getLatestCode()).toBe(
-        "\n  await bar;\n  await page.type('selector', 'value');\n"
+        '\n  await bar;\n  await page.type(\'selector\', "value");\n'
       );
       expect(builder.waitForSelector).toHaveBeenNthCalledWith(1, 'selector');
     });
@@ -378,11 +378,11 @@ describe('Test builders', () => {
       expect(builder.waitForSelectorAndNavigation).toHaveBeenNthCalledWith(
         1,
         'selector:not([disabled])',
-        "page.type('selector', 'value')"
+        'page.type(\'selector\', "value")'
       );
       builder.fill('selector', 'value', false);
       expect(builder.getLatestCode()).toBe(
-        "\n  await bar;\n  await page.type('selector', 'value');\n"
+        '\n  await bar;\n  await page.type(\'selector\', "value");\n'
       );
       expect(builder.waitForSelector).toHaveBeenNthCalledWith(
         1,
