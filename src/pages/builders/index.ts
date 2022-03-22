@@ -102,7 +102,7 @@ export class ActionContext extends BaseAction {
       case ActionType.Input:
         return `Fill ${truncateText(
           JSON.stringify(value ?? ''),
-          8
+          16
         )} on <${tagName.toLowerCase()}> ${getBestSelectorForAction(
           this.action,
           this.scriptType
