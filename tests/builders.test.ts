@@ -2,15 +2,22 @@ import {
   CypressScriptBuilder,
   PlaywrightScriptBuilder,
   PuppeteerScriptBuilder,
+  truncateText,
 } from '../src/pages/builders';
 
 describe('Test builders', () => {
+  test('truncateText', () => {
+    expect(truncateText('hello', 10)).toBe('hello');
+    expect(truncateText('hello', 2)).toBe('he...');
+    expect(truncateText('hello', 0)).toBe('...');
+  });
+
   describe('CypressScriptBuilder', () => {
     let builder: any;
     let mockPushCodes: any;
 
     beforeEach(() => {
-      builder = new CypressScriptBuilder();
+      builder = new CypressScriptBuilder(true);
       mockPushCodes = jest.spyOn(builder, 'pushCodes').mockReturnValue(builder);
     });
 
@@ -105,7 +112,7 @@ describe('Test builders', () => {
     let mockWaitForActionAndNavigation: any;
 
     beforeEach(() => {
-      builder = new PlaywrightScriptBuilder();
+      builder = new PlaywrightScriptBuilder(true);
 
       mockWaitForActionAndNavigation = jest
         .spyOn(builder, 'waitForActionAndNavigation')
@@ -144,111 +151,111 @@ describe('Test builders', () => {
 
     test('click', () => {
       builder.click('selector', true);
-      expect(builder.getLastestAction()).toBe('\n  foo\n');
+      expect(builder.getLatestCode()).toBe('\n  foo\n');
       expect(builder.waitForActionAndNavigation).toHaveBeenNthCalledWith(
         1,
         "page.click('selector')"
       );
       builder.click('selector', false);
-      expect(builder.getLastestAction()).toBe(
+      expect(builder.getLatestCode()).toBe(
         "\n  await page.click('selector');\n"
       );
     });
 
     test('hover', () => {
       builder.hover('selector', true);
-      expect(builder.getLastestAction()).toBe('\n  foo\n');
+      expect(builder.getLatestCode()).toBe('\n  foo\n');
       expect(builder.waitForActionAndNavigation).toHaveBeenNthCalledWith(
         1,
         "page.hover('selector')"
       );
       builder.hover('selector', false);
-      expect(builder.getLastestAction()).toBe(
+      expect(builder.getLatestCode()).toBe(
         "\n  await page.hover('selector');\n"
       );
     });
 
     test('load', () => {
       builder.load('url');
-      expect(builder.getLastestAction()).toBe("\n  await page.goto('url');\n");
+      expect(builder.getLatestCode()).toBe("\n  await page.goto('url');\n");
     });
 
     test('resize', () => {
       builder.resize(1, 1);
-      expect(builder.getLastestAction()).toBe(
+      expect(builder.getLatestCode()).toBe(
         '\n  await page.setViewportSize({ width: 1, height: 1 });\n'
       );
     });
 
     test('fill', () => {
       builder.fill('selector', 'value', true);
-      expect(builder.getLastestAction()).toBe('\n  foo\n');
+      expect(builder.getLatestCode()).toBe('\n  foo\n');
       expect(builder.waitForActionAndNavigation).toHaveBeenNthCalledWith(
         1,
         "page.fill('selector', 'value')"
       );
       builder.fill('selector', 'value', false);
-      expect(builder.getLastestAction()).toBe(
+      expect(builder.getLatestCode()).toBe(
         "\n  await page.fill('selector', 'value');\n"
       );
     });
 
     test('type', () => {
       builder.type('selector', 'value', true);
-      expect(builder.getLastestAction()).toBe('\n  foo\n');
+      expect(builder.getLatestCode()).toBe('\n  foo\n');
       expect(builder.waitForActionAndNavigation).toHaveBeenNthCalledWith(
         1,
         "page.type('selector', 'value')"
       );
       builder.type('selector', 'value', false);
-      expect(builder.getLastestAction()).toBe(
+      expect(builder.getLatestCode()).toBe(
         "\n  await page.type('selector', 'value');\n"
       );
     });
 
     test('select', () => {
       builder.select('selector', 'value', true);
-      expect(builder.getLastestAction()).toBe('\n  foo\n');
+      expect(builder.getLatestCode()).toBe('\n  foo\n');
       expect(builder.waitForActionAndNavigation).toHaveBeenNthCalledWith(
         1,
         "page.selectOption('selector', 'value')"
       );
       builder.select('selector', 'value', false);
-      expect(builder.getLastestAction()).toBe(
+      expect(builder.getLatestCode()).toBe(
         "\n  await page.selectOption('selector', 'value');\n"
       );
     });
 
     test('keydown', () => {
       builder.keydown('selector', 'value', true);
-      expect(builder.getLastestAction()).toBe('\n  foo\n');
+      expect(builder.getLatestCode()).toBe('\n  foo\n');
       expect(builder.waitForActionAndNavigation).toHaveBeenNthCalledWith(
         1,
         "page.press('selector', 'value')"
       );
       builder.keydown('selector', 'value', false);
-      expect(builder.getLastestAction()).toBe(
+      expect(builder.getLatestCode()).toBe(
         "\n  await page.press('selector', 'value');\n"
       );
     });
 
     test('wheel', () => {
       builder.wheel(1.6, 1.1);
-      expect(builder.getLastestAction()).toBe(
+      expect(builder.getLatestCode()).toBe(
         '\n  await page.mouse.wheel(1, 1);\n'
       );
     });
 
     test('fullScreenshot', () => {
       builder.fullScreenshot();
-      expect(builder.getLastestAction()).toBe(
+      expect(builder.getLatestCode()).toBe(
         "\n  await page.screenshot({ path: 'screenshot.png', fullPage: true });\n"
       );
     });
 
     test('awaitText', () => {
       builder.awaitText('foo');
-      expect(builder.getLastestAction()).toBe(
+      expect(builder.getLatestCode()).toBe(
         "\n  await page.waitForSelector('text=foo')\n"
       );
     });
@@ -260,7 +267,7 @@ describe('Test builders', () => {
     let mockWaitForSelector: any;
 
     beforeEach(() => {
-      builder = new PuppeteerScriptBuilder();
+      builder = new PuppeteerScriptBuilder(true);
 
       mockWaitForSelectorAndNavigation = jest
         .spyOn(builder, 'waitForSelectorAndNavigation')
@@ -310,14 +317,14 @@ describe('Test builders', () => {
 
     test('click', () => {
       builder.click('selector', true);
-      expect(builder.getLastestAction()).toBe('\n  foo\n');
+      expect(builder.getLatestCode()).toBe('\n  foo\n');
       expect(builder.waitForSelectorAndNavigation).toHaveBeenNthCalledWith(
         1,
         'selector',
         "page.click('selector')"
       );
       builder.click('selector', false);
-      expect(builder.getLastestAction()).toBe(
+      expect(builder.getLatestCode()).toBe(
         "\n  await bar;\n  await page.click('selector');\n"
       );
       expect(builder.waitForSelector).toHaveBeenNthCalledWith(1, 'selector');
@@ -325,14 +332,14 @@ describe('Test builders', () => {
 
     test('hover', () => {
       builder.hover('selector', true);
-      expect(builder.getLastestAction()).toBe('\n  foo\n');
+      expect(builder.getLatestCode()).toBe('\n  foo\n');
       expect(builder.waitForSelectorAndNavigation).toHaveBeenNthCalledWith(
         1,
         'selector',
         "page.hover('selector')"
       );
       builder.hover('selector', false);
-      expect(builder.getLastestAction()).toBe(
+      expect(builder.getLatestCode()).toBe(
         "\n  await bar;\n  await page.hover('selector');\n"
       );
       expect(builder.waitForSelector).toHaveBeenNthCalledWith(1, 'selector');
@@ -340,26 +347,26 @@ describe('Test builders', () => {
 
     test('load', () => {
       builder.load('url');
-      expect(builder.getLastestAction()).toBe("\n  await page.goto('url');\n");
+      expect(builder.getLatestCode()).toBe("\n  await page.goto('url');\n");
     });
 
     test('resize', () => {
       builder.resize(1, 1);
-      expect(builder.getLastestAction()).toBe(
+      expect(builder.getLatestCode()).toBe(
         '\n  await page.setViewport({ width: 1, height: 1 });\n'
       );
     });
 
     test('type', () => {
       builder.type('selector', 'value', true);
-      expect(builder.getLastestAction()).toBe('\n  foo\n');
+      expect(builder.getLatestCode()).toBe('\n  foo\n');
       expect(builder.waitForSelectorAndNavigation).toHaveBeenNthCalledWith(
         1,
         'selector',
         "page.type('selector', 'value')"
       );
       builder.type('selector', 'value', false);
-      expect(builder.getLastestAction()).toBe(
+      expect(builder.getLatestCode()).toBe(
         "\n  await bar;\n  await page.type('selector', 'value');\n"
       );
       expect(builder.waitForSelector).toHaveBeenNthCalledWith(1, 'selector');
@@ -367,14 +374,14 @@ describe('Test builders', () => {
 
     test('fill', () => {
       builder.fill('selector', 'value', true);
-      expect(builder.getLastestAction()).toBe('\n  foo\n');
+      expect(builder.getLatestCode()).toBe('\n  foo\n');
       expect(builder.waitForSelectorAndNavigation).toHaveBeenNthCalledWith(
         1,
         'selector:not([disabled])',
         "page.type('selector', 'value')"
       );
       builder.fill('selector', 'value', false);
-      expect(builder.getLastestAction()).toBe(
+      expect(builder.getLatestCode()).toBe(
         "\n  await bar;\n  await page.type('selector', 'value');\n"
       );
       expect(builder.waitForSelector).toHaveBeenNthCalledWith(
@@ -385,14 +392,14 @@ describe('Test builders', () => {
 
     test('select', () => {
       builder.select('selector', 'value', true);
-      expect(builder.getLastestAction()).toBe('\n  foo\n');
+      expect(builder.getLatestCode()).toBe('\n  foo\n');
       expect(builder.waitForSelectorAndNavigation).toHaveBeenNthCalledWith(
         1,
         'selector',
         "page.select('selector', 'value')"
       );
       builder.select('selector', 'value', false);
-      expect(builder.getLastestAction()).toBe(
+      expect(builder.getLatestCode()).toBe(
         "\n  await bar;\n  await page.select('selector', 'value');\n"
       );
       expect(builder.waitForSelector).toHaveBeenNthCalledWith(1, 'selector');
@@ -400,35 +407,35 @@ describe('Test builders', () => {
 
     test('keydown', () => {
       builder.keydown('selector', 'value', true);
-      expect(builder.getLastestAction()).toBe('\n  foo\n');
+      expect(builder.getLatestCode()).toBe('\n  foo\n');
       expect(builder.waitForSelectorAndNavigation).toHaveBeenNthCalledWith(
         1,
         'selector',
         "page.keyboard.press('value')"
       );
       builder.keydown('selector', 'value', false);
-      expect(builder.getLastestAction()).toBe(
+      expect(builder.getLatestCode()).toBe(
         "\n  await page.waitForSelector('selector');\n  await page.keyboard.press('value');\n"
       );
     });
 
     test('wheel', () => {
       builder.wheel(1.6, 1.1);
-      expect(builder.getLastestAction()).toBe(
+      expect(builder.getLatestCode()).toBe(
         '\n  await page.evaluate(() => window.scrollBy(1.6, 1.1));\n'
       );
     });
 
     test('fullScreenshot', () => {
       builder.fullScreenshot();
-      expect(builder.getLastestAction()).toBe(
+      expect(builder.getLatestCode()).toBe(
         "\n  await page.screenshot({ path: 'screenshot.png', fullPage: true });\n"
       );
     });
 
     test('awaitText', () => {
       builder.awaitText('foo');
-      expect(builder.getLastestAction()).toBe(
+      expect(builder.getLatestCode()).toBe(
         `\n  await page.waitForFunction("document.body.innerText.includes('foo')");\n`
       );
     });
