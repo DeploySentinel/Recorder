@@ -31,8 +31,13 @@ export const truncateText = (str: string, maxLen: number) => {
   return `${str.substring(0, maxLen)}${str.length > maxLen ? '...' : ''}`;
 };
 
+export const isActionStateful = (action: Action) => {
+  return action.tagName === TagName.TextArea;
+};
+
 type ActionState = {
   causesNavigation: boolean;
+  isStateful: boolean;
 };
 
 export class ActionContext extends BaseAction {
@@ -95,7 +100,10 @@ export class ActionContext extends BaseAction {
             : getBestSelectorForAction(this.action, this.scriptType)
         }`;
       case ActionType.Input:
-        return `Fill "${value}" on <${tagName.toLowerCase()}> ${getBestSelectorForAction(
+        return `Fill ${truncateText(
+          JSON.stringify(value ?? ''),
+          16
+        )} on <${tagName.toLowerCase()}> ${getBestSelectorForAction(
           this.action,
           this.scriptType
         )}`;
@@ -110,10 +118,10 @@ export class ActionContext extends BaseAction {
       case ActionType.FullScreenshot:
         return `Take full page screenshot`;
       case ActionType.AwaitText:
-        return `Wait for text "${truncateText(
-          this.action.text,
+        return `Wait for text ${truncateText(
+          JSON.stringify(this.action.text),
           25
-        )}" to appear`;
+        )} to appear`;
       default:
         return '';
     }
@@ -136,18 +144,6 @@ export abstract class ScriptBuilder {
     this.actionContexts = [];
     this.showComments = showComments;
   }
-
-  pushComments = (comments: string) => {
-    this.codes.push(`\n  ${comments}`);
-    return this;
-  };
-
-  pushCodes = (codes: string) => {
-    this.codes.push(`\n  ${codes}\n`);
-    return this;
-  };
-
-  getLatestCode = () => this.codes[this.codes.length - 1];
 
   abstract click: (selector: string, causesNavigation: boolean) => this;
 
@@ -192,11 +188,9 @@ export abstract class ScriptBuilder {
 
   abstract awaitText: (test: string) => this;
 
-  abstract build: () => string;
+  abstract buildScript: () => string;
 
-  transformActionIntoCodes = (actionContext: ActionContext) => {
-    this.actionContexts.push(actionContext);
-
+  private transformActionIntoCodes = (actionContext: ActionContext) => {
     if (this.showComments) {
       const actionDescription = actionContext.getDescription();
       this.pushComments(`// ${actionDescription}`);
@@ -229,12 +223,13 @@ export abstract class ScriptBuilder {
           this.select(bestSelector as string, value ?? '', causesNavigation);
         } else if (
           // If the input is "fillable" or a text area
-          (tagName === TagName.Input &&
-            inputType != null &&
-            FILLABLE_INPUT_TYPES.includes(inputType)) ||
-          tagName === TagName.TextArea
+          tagName === TagName.Input &&
+          inputType != null &&
+          FILLABLE_INPUT_TYPES.includes(inputType)
         ) {
           // Do more actionability checks
+          this.fill(bestSelector as string, value ?? '', causesNavigation);
+        } else if (tagName === TagName.TextArea) {
           this.fill(bestSelector as string, value ?? '', causesNavigation);
         } else {
           this.type(bestSelector as string, value ?? '', causesNavigation);
@@ -265,6 +260,49 @@ export abstract class ScriptBuilder {
         break;
     }
   };
+
+  protected pushComments = (comments: string) => {
+    this.codes.push(`\n  ${comments}`);
+    return this;
+  };
+
+  protected pushCodes = (codes: string) => {
+    this.codes.push(`\n  ${codes}\n`);
+    return this;
+  };
+
+  pushActionContext = (actionContext: ActionContext) => {
+    this.actionContexts.push(actionContext);
+  };
+
+  buildCodes = () => {
+    let prevActionContext: ActionContext | undefined;
+
+    for (const actionContext of this.actionContexts) {
+      if (!actionContext.getActionState().isStateful) {
+        if (
+          prevActionContext !== undefined &&
+          prevActionContext.getActionState().isStateful
+        ) {
+          this.transformActionIntoCodes(prevActionContext);
+        }
+        this.transformActionIntoCodes(actionContext);
+      }
+      prevActionContext = actionContext;
+    }
+
+    // edge case
+    if (
+      prevActionContext !== undefined &&
+      prevActionContext.getActionState().isStateful
+    ) {
+      this.transformActionIntoCodes(prevActionContext);
+    }
+    return this;
+  };
+
+  // for test
+  getLatestCode = () => this.codes[this.codes.length - 1];
 }
 
 export class PlaywrightScriptBuilder extends ScriptBuilder {
@@ -307,7 +345,7 @@ export class PlaywrightScriptBuilder extends ScriptBuilder {
   };
 
   fill = (selector: string, value: string, causesNavigation: boolean) => {
-    const actionStr = `page.fill('${selector}', '${value}')`;
+    const actionStr = `page.fill('${selector}', ${JSON.stringify(value)})`;
     const action = causesNavigation
       ? this.waitForActionAndNavigation(actionStr)
       : `await ${actionStr};`;
@@ -316,7 +354,7 @@ export class PlaywrightScriptBuilder extends ScriptBuilder {
   };
 
   type = (selector: string, value: string, causesNavigation: boolean) => {
-    const actionStr = `page.type('${selector}', '${value}')`;
+    const actionStr = `page.type('${selector}', ${JSON.stringify(value)})`;
     const action = causesNavigation
       ? this.waitForActionAndNavigation(actionStr)
       : `await ${actionStr};`;
@@ -361,7 +399,7 @@ export class PlaywrightScriptBuilder extends ScriptBuilder {
     return this;
   };
 
-  build = () => {
+  buildScript = () => {
     return `const playwright = require('playwright');
 (async () => {
   const browser = await playwright['chromium'].launch({
@@ -424,7 +462,7 @@ export class PuppeteerScriptBuilder extends ScriptBuilder {
   };
 
   type = (selector: string, value: string, causesNavigation: boolean) => {
-    const pageType = `page.type('${selector}', '${value}')`;
+    const pageType = `page.type('${selector}', ${JSON.stringify(value)})`;
     if (causesNavigation) {
       this.pushCodes(this.waitForSelectorAndNavigation(selector, pageType));
     } else {
@@ -438,7 +476,7 @@ export class PuppeteerScriptBuilder extends ScriptBuilder {
   // Puppeteer doesn't support `fill` so we'll do our own actionability checks
   // but still type
   fill = (selector: string, value: string, causesNavigation: boolean) => {
-    const pageType = `page.type('${selector}', '${value}')`;
+    const pageType = `page.type('${selector}', ${JSON.stringify(value)})`;
     if (causesNavigation) {
       this.pushCodes(
         this.waitForSelectorAndNavigation(
@@ -504,7 +542,7 @@ export class PuppeteerScriptBuilder extends ScriptBuilder {
     return this;
   };
 
-  build = () => {
+  buildScript = () => {
     return `const puppeteer = require('puppeteer');
 (async () => {
   const browser = await puppeteer.launch({
@@ -540,12 +578,12 @@ export class CypressScriptBuilder extends ScriptBuilder {
   };
 
   fill = (selector: string, value: string, causesNavigation: boolean) => {
-    this.pushCodes(`cy.get('${selector}').type('${value}')`);
+    this.pushCodes(`cy.get('${selector}').type(${JSON.stringify(value)})`);
     return this;
   };
 
   type = (selector: string, value: string, causesNavigation: boolean) => {
-    this.pushCodes(`cy.get('${selector}').type('${value}')`);
+    this.pushCodes(`cy.get('${selector}').type(${JSON.stringify(value)})`);
     return this;
   };
 
@@ -583,7 +621,7 @@ export class CypressScriptBuilder extends ScriptBuilder {
     return this;
   };
 
-  build = () => {
+  buildScript = () => {
     return `it('Written with DeploySentinel Recorder', () => {${this.codes.join(
       ''
     )}})`;
@@ -621,11 +659,13 @@ export const genCode = (
     const nextAction = actions[i + 1];
     const causesNavigation = nextAction?.type === ActionType.Navigate;
 
-    scriptBuilder.transformActionIntoCodes(
+    scriptBuilder.pushActionContext(
       new ActionContext(action, scriptType, {
         causesNavigation,
+        isStateful: isActionStateful(action),
       })
     );
   }
-  return scriptBuilder.build();
+
+  return scriptBuilder.buildCodes().buildScript();
 };

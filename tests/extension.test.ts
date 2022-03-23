@@ -86,7 +86,6 @@ test('control bar shows correct actions during recording', async () => {
   expect(content).toEqual(
     expect.stringContaining('Press "Enter" on #searchInput')
   );
-  expect(content).toEqual(expect.stringContaining('Click on link "corn"'));
   expect(content).toEqual(expect.stringContaining('Take full page screenshot'));
 
   // End test
@@ -131,7 +130,7 @@ test('can click through recording steps and it generates the right code', async 
     expect.stringContaining("page.click('#searchInput');")
   );
   expect(content).toEqual(
-    expect.stringContaining("page.fill('#searchInput', 'tacos');")
+    expect.stringContaining('page.fill(\'#searchInput\', "tacos");')
   );
   expect(content).toEqual(
     expect.stringContaining("page.press('#searchInput', 'Enter'),")
