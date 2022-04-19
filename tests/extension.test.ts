@@ -124,8 +124,14 @@ test('can click through recording steps and it generates the right code', async 
 
   // Grab code generated
   const content = await page.textContent('[data-testid="code-block"]');
-  expect(content).toEqual(expect.stringContaining('playwright'));
-  expect(content).toEqual(expect.stringContaining('browser'));
+  expect(content).toEqual(
+    expect.stringContaining("import { test, expect } from '@playwright/test'")
+  );
+  expect(content).toEqual(
+    expect.stringContaining(
+      "test('Written with DeploySentinel Recorder', async ({ page }) =>"
+    )
+  );
   expect(content).toEqual(
     expect.stringContaining("page.click('#searchInput');")
   );
