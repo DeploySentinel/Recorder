@@ -400,15 +400,11 @@ export class PlaywrightScriptBuilder extends ScriptBuilder {
   };
 
   buildScript = () => {
-    return `const playwright = require('playwright');
-(async () => {
-  const browser = await playwright['chromium'].launch({
-    // headless: false, slowMo: 100, // Uncomment to visualize test
-  });
-  const page = await browser.newPage();
-${this.codes.join('')}
-  await browser.close();
-})();`;
+    return `import { test, expect } from '@playwright/test';
+
+test('Written with DeploySentinel Recorder', async ({ page }) => {${this.codes.join(
+      ''
+    )}});`;
   };
 }
 

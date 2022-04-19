@@ -124,18 +124,12 @@ describe('Test builders', () => {
         .pushComments('// hello-world')
         .pushCodes("const hellowWorld = () => console.log('hello world')")
         .buildScript();
-      expect(output).toBe(`const playwright = require('playwright');
-(async () => {
-  const browser = await playwright['chromium'].launch({
-    // headless: false, slowMo: 100, // Uncomment to visualize test
-  });
-  const page = await browser.newPage();
+      expect(output).toBe(`import { test, expect } from '@playwright/test';
 
+test('Written with DeploySentinel Recorder', async ({ page }) => {
   // hello-world
   const hellowWorld = () => console.log('hello world')
-
-  await browser.close();
-})();`);
+});`);
     });
 
     test('waitForNavigation', () => {
