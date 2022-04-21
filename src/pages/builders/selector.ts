@@ -104,7 +104,8 @@ export default function genSelectors(element: HTMLElement | null) {
 export function getBestSelectorForAction(action: Action, library: ScriptType) {
   switch (action.type) {
     case ActionType.Click:
-    case ActionType.Hover: {
+    case ActionType.Hover:
+    case ActionType.DragAndDrop: {
       const selectors = action.selectors;
       // Only supported for playwright, less than 25 characters, and element only has text inside
       const textSelector =

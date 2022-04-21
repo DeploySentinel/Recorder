@@ -77,6 +77,7 @@ class Recorder {
       ...lastAction,
       ...actionUpdate,
     };
+
     this._recording[this._recording.length - 1] = newAction;
     chrome.storage.local.set({ recording: this._recording });
 
@@ -125,11 +126,14 @@ class Recorder {
       });
 
       window.addEventListener('click', this.onClick, true);
-      window.addEventListener('keydown', this.onKeyDown, true);
+      window.addEventListener('contextmenu', this.onContextMenu, true);
+      window.addEventListener('dragstart', this.onDrag, true);
+      window.addEventListener('drop', this.onDrag, true);
       window.addEventListener('input', this.onInput, true);
+      window.addEventListener('keydown', this.onKeyDown, true);
       window.addEventListener('resize', this.debouncedOnResize, true);
       window.addEventListener('wheel', this.onMouseWheel, true);
-      window.addEventListener('contextmenu', this.onContextMenu, true);
+
       // We listen to a context menu action
       chrome.runtime.onMessage.addListener(this.onBackgroundMessage);
 
@@ -148,11 +152,13 @@ class Recorder {
 
   deregister() {
     window.removeEventListener('click', this.onClick, true);
-    window.removeEventListener('keydown', this.onKeyDown, true);
+    window.removeEventListener('contextmenu', this.onContextMenu, true);
+    window.removeEventListener('dragstart', this.onDrag, true);
+    window.removeEventListener('drop', this.onDrag, true);
     window.removeEventListener('input', this.onInput, true);
+    window.removeEventListener('keydown', this.onKeyDown, true);
     window.removeEventListener('resize', this.debouncedOnResize, true);
     window.removeEventListener('wheel', this.onMouseWheel, true);
-    window.removeEventListener('contextmenu', this.onContextMenu, true);
   }
 
   private onMouseWheel = (event: WheelEvent) => {
@@ -213,6 +219,31 @@ class Recorder {
 
     // @ts-ignore
     this.appendToRecording(action);
+  };
+
+  private onDrag = (event: DragEvent) => {
+    if (isEventFromOverlay(event)) {
+      return;
+    }
+
+    const lastAction = this._recording[this._recording.length - 1];
+
+    if (event.type === 'dragstart') {
+      this.appendToRecording({
+        ...buildBaseAction(event),
+        type: ActionType.DragAndDrop,
+        sourceX: event.x,
+        sourceY: event.y,
+      });
+    } else if (
+      event.type === 'drop' &&
+      lastAction.type === ActionType.DragAndDrop
+    ) {
+      this.updateLastRecordedAction({
+        targetX: event.x,
+        targetY: event.y,
+      });
+    }
   };
 
   private onKeyDown = (event: KeyboardEvent) => {

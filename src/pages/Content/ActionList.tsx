@@ -99,6 +99,17 @@ function ActionListItem({
           <span className="em-text">Wait for text</span>
           <span>"{action.text}"</span>
         </>
+      ) : action.type === ActionType.DragAndDrop ? (
+        <>
+          <span className="em-text">Drag n Drop</span> <span>from</span>{' '}
+          <span className="mono">
+            ({action.sourceX}, {action.sourceY})
+          </span>{' '}
+          <span>to</span>{' '}
+          <span className="mono">
+            ({action.targetX}, {action.targetY})
+          </span>
+        </>
       ) : (
         <></>
       )}
