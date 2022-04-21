@@ -250,7 +250,7 @@ test('Written with DeploySentinel Recorder', async ({ page }) => {
     test('awaitText', () => {
       builder.awaitText('foo');
       expect(builder.getLatestCode()).toBe(
-        "\n  await page.waitForSelector('text=foo')\n"
+        "\n  await page.waitForSelector('text=foo');\n"
       );
     });
   });

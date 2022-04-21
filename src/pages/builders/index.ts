@@ -577,7 +577,20 @@ export class PuppeteerScriptBuilder extends ScriptBuilder {
     return this;
   };
 
-  dragAndDrop = (source: any, target: any) => {
+  dragAndDrop = (
+    sourceX: number,
+    sourceY: number,
+    targetX: number,
+    targetY: number
+  ) => {
+    this.pushCodes(
+      [
+        `await page.mouse.move(${sourceX}, ${sourceY});`,
+        '  await page.mouse.down();',
+        `  await page.mouse.move(${targetX}, ${targetY});`,
+        '  await page.mouse.up();',
+      ].join('\n')
+    );
     return this;
   };
 
