@@ -673,7 +673,14 @@ export class CypressScriptBuilder extends ScriptBuilder {
     return this;
   };
 
-  dragAndDrop = (source: any, target: any) => {
+  dragAndDrop = (
+    sourceX: number,
+    sourceY: number,
+    targetX: number,
+    targetY: number
+  ) => {
+    // TODO -> IMPLEMENT ME
+    this.pushCodes('');
     return this;
   };
 
