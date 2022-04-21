@@ -26,10 +26,10 @@ describe('Test builders', () => {
 
       const output = builder
         .pushComments('// hello-world')
-        .pushCodes('cy.visit()')
+        .pushCodes('cy.visit();')
         .buildScript();
       expect(output).toBe(
-        `it('Written with DeploySentinel Recorder', () => {\n  // hello-world\n  cy.visit()\n})`
+        `it('Written with DeploySentinel Recorder', () => {\n  // hello-world\n  cy.visit();\n});`
       );
     });
 
@@ -37,7 +37,7 @@ describe('Test builders', () => {
       builder.click('selector', true);
       expect(mockPushCodes).toHaveBeenNthCalledWith(
         1,
-        "cy.get('selector').click()"
+        "cy.get('selector').click();"
       );
     });
 
@@ -45,25 +45,25 @@ describe('Test builders', () => {
       builder.hover('selector', true);
       expect(mockPushCodes).toHaveBeenNthCalledWith(
         1,
-        "cy.get('selector').trigger('mouseover')"
+        "cy.get('selector').trigger('mouseover');"
       );
     });
 
     test('load', () => {
       builder.load('url');
-      expect(mockPushCodes).toHaveBeenNthCalledWith(1, "cy.visit('url')");
+      expect(mockPushCodes).toHaveBeenNthCalledWith(1, "cy.visit('url');");
     });
 
     test('resize', () => {
       builder.resize(1, 2);
-      expect(mockPushCodes).toHaveBeenNthCalledWith(1, 'cy.viewport(1, 2)');
+      expect(mockPushCodes).toHaveBeenNthCalledWith(1, 'cy.viewport(1, 2);');
     });
 
     test('fill', () => {
       builder.fill('selector', 'value', true);
       expect(mockPushCodes).toHaveBeenNthCalledWith(
         1,
-        'cy.get(\'selector\').type("value")'
+        'cy.get(\'selector\').type("value");'
       );
     });
 
@@ -71,7 +71,7 @@ describe('Test builders', () => {
       builder.type('selector', 'value', true);
       expect(mockPushCodes).toHaveBeenNthCalledWith(
         1,
-        'cy.get(\'selector\').type("value")'
+        'cy.get(\'selector\').type("value");'
       );
     });
 
@@ -79,7 +79,7 @@ describe('Test builders', () => {
       builder.select('selector', 'option', true);
       expect(mockPushCodes).toHaveBeenNthCalledWith(
         1,
-        "cy.get('selector').select('option')"
+        "cy.get('selector').select('option');"
       );
     });
 
@@ -87,23 +87,23 @@ describe('Test builders', () => {
       builder.keydown('selector', 'Enter', true);
       expect(mockPushCodes).toHaveBeenNthCalledWith(
         1,
-        "cy.get('selector').type('{Enter}')"
+        "cy.get('selector').type('{Enter}');"
       );
     });
 
     test('wheel', () => {
       builder.wheel(5, 6, 1, 2);
-      expect(mockPushCodes).toHaveBeenNthCalledWith(1, 'cy.scrollTo(1, 2)');
+      expect(mockPushCodes).toHaveBeenNthCalledWith(1, 'cy.scrollTo(1, 2);');
     });
 
     test('fullScreenshot', () => {
       builder.fullScreenshot();
-      expect(mockPushCodes).toHaveBeenNthCalledWith(1, 'cy.screenshot()');
+      expect(mockPushCodes).toHaveBeenNthCalledWith(1, 'cy.screenshot();');
     });
 
     test('awaitText', () => {
       builder.awaitText('text');
-      expect(mockPushCodes).toHaveBeenNthCalledWith(1, "cy.contains('text')");
+      expect(mockPushCodes).toHaveBeenNthCalledWith(1, "cy.contains('text');");
     });
   });
 
@@ -256,7 +256,7 @@ describe('Test builders', () => {
     test('awaitText', () => {
       builder.awaitText('foo');
       expect(builder.getLatestCode()).toBe(
-        "\n  await page.waitForSelector('text=foo')\n"
+        "\n  await page.waitForSelector('text=foo');\n"
       );
     });
   });
