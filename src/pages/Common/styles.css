@@ -91,6 +91,9 @@
 .justify-between {
   justify-content: space-between;
 }
+.justify-content-center {
+  justify-content: center;
+}
 .items-center {
   align-items: center;
 }

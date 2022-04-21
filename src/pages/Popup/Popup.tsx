@@ -21,7 +21,10 @@ import {
   getCurrentTab,
   executeScript,
   executeCleanUp,
+  isCypressBrowser,
 } from '../Common/utils';
+import { usePreferredLibrary } from '../Common/hooks';
+import ScriptTypeSelect from '../Common/ScriptTypeSelect';
 
 import type { Action } from '../types';
 import { ActionsMode, ScriptType } from '../types';
@@ -38,13 +41,14 @@ function LastStepPanel({
   actions: Action[];
   onBack: () => void;
 }) {
+  const [preferredLibrary, setPreferredLibrary] = usePreferredLibrary();
+
   const [showActionsMode, setShowActionsMode] = useState<ActionsMode>(
     ActionsMode.Code
   );
-  const [scriptType, setScriptType] = useState<ScriptType>(
-    ScriptType.Playwright
-  );
   const [copyCodeConfirm, setCopyCodeConfirm] = useState<boolean>(false);
+
+  const displayedScriptType = preferredLibrary ?? ScriptType.Playwright;
 
   return (
     <div>
@@ -81,23 +85,12 @@ function LastStepPanel({
       {showActionsMode === ActionsMode.Code && (
         <div className="mt-4">
           <div className="d-flex justify-between items-end mb-4">
-            <select
-              className="link-button mr-4"
-              style={{
-                backgroundColor: '#080a0b',
-                color: 'white',
-                border: 'none',
-                outline: 'none',
-              }}
-              onChange={(e) => setScriptType(e.target.value as ScriptType)}
-              value={scriptType}
-            >
-              <option value={ScriptType.Playwright}>Playwright Library</option>
-              <option value={ScriptType.Puppeteer}>Puppeteer Library</option>
-              <option value={ScriptType.Cypress}>Cypress Library</option>
-            </select>
+            <ScriptTypeSelect
+              onChange={(val) => setPreferredLibrary(val)}
+              value={displayedScriptType}
+            />
             <CopyToClipboard
-              text={genCode(actions, true, scriptType)}
+              text={genCode(actions, true, displayedScriptType)}
               onCopy={() => {
                 setCopyCodeConfirm(true);
                 setTimeout(() => {
@@ -120,7 +113,7 @@ function LastStepPanel({
           </div>
           <CodeGen
             actions={actions}
-            library={scriptType}
+            library={displayedScriptType}
             styles={{ height: 400 }}
           />
         </div>
@@ -135,6 +128,8 @@ function LastStepPanel({
 }
 
 const Popup = () => {
+  const [preferredLibrary, setPreferredLibrary] = usePreferredLibrary();
+
   const [recordingTabId, setRecordingTabId] = useState<number | null>(null);
   const [currentTabId, setCurrentTabId] = useState<number | null>(null);
 
@@ -142,9 +137,7 @@ const Popup = () => {
 
   const [isShowingLastTest, setIsShowingLastTest] = useState<boolean>(false);
 
-  const [showBetaCTA, setShowBetaCTA] = useState<boolean>(
-    localStorage.getItem('showBetaCta') !== 'false'
-  );
+  const [showBetaCTA, setShowBetaCTA] = useState<boolean>(false);
 
   useEffect(() => {
     localStorageGet(['recording', 'recordingTabId']).then(
@@ -175,6 +168,40 @@ const Popup = () => {
     });
   }, []);
 
+  // Sets Cypress as default library if we're in the Cypress test browser
+  useEffect(() => {
+    (async () => {
+      const currentTab = await getCurrentTab();
+      const tabId = currentTab.id;
+      if (tabId == undefined) {
+        return;
+      }
+      const isCypress = await isCypressBrowser(tabId);
+      if (isCypress) {
+        setPreferredLibrary(ScriptType.Cypress);
+      }
+    })();
+  }, []);
+
+  function getCypressAutFrame(tabId: number) {
+    return new Promise<chrome.webNavigation.GetAllFrameResultDetails>(
+      (resolve, reject) => {
+        chrome.webNavigation.getAllFrames({ tabId }, (frames) => {
+          const autFrame = frames?.filter((frame) => {
+            // Must be child of parent frame and not have "__cypress" in the url
+            return (
+              frame.parentFrameId === 0 && frame.url.indexOf('__cypress') === -1
+            );
+          })?.[0];
+          if (autFrame == null || autFrame.frameId == null) {
+            return reject(new Error('No AUT frame found'));
+          }
+          resolve(autFrame);
+        });
+      }
+    );
+  }
+
   const onRecordNewTestClick = async () => {
     onNewRecording();
 
@@ -185,12 +212,24 @@ const Popup = () => {
       throw new Error('No tab id found');
     }
 
-    // Let everyone know we should be recording with this current tab
-    // Clear out event buffer
-    setStartRecordingStorage(tabId, currentTab.url || '');
+    const isCypress = await isCypressBrowser(tabId);
+    if (isCypress) {
+      const autFrame = await getCypressAutFrame(tabId);
+      if (autFrame == null) {
+        throw new Error('No AUT frame found');
+      }
 
-    await executeCleanUp(tabId);
-    await executeScript(tabId, 'contentScript.bundle.js');
+      const frameId = autFrame.frameId;
+      const frameUrl = autFrame.url;
+
+      setStartRecordingStorage(tabId, frameId, frameUrl);
+      await executeCleanUp(tabId, frameId);
+      await executeScript(tabId, frameId, 'contentScript.bundle.js');
+    } else {
+      setStartRecordingStorage(tabId, 0, currentTab.url || '');
+      await executeCleanUp(tabId, 0);
+      await executeScript(tabId, 0, 'contentScript.bundle.js');
+    }
 
     window.close();
   };
@@ -263,8 +302,8 @@ const Popup = () => {
                 }}
                 className="text-grey mt-6"
               >
-                Generate Playwright & Puppeteer scripts from your browser
-                actions (ex. click, type, scroll).
+                Generate Cypress, Playwright & Puppeteer scripts from your
+                browser actions (ex. click, type, scroll).
               </div>
               <button
                 className="btn-primary mt-8"
@@ -278,6 +317,17 @@ const Popup = () => {
                 />
                 &nbsp; Start Recording from Current Tab
               </button>
+              <div className="d-flex text-sm justify-content-center text-grey mt-6">
+                <div className="d-flex">
+                  <div>Preferred Library: &nbsp;</div>
+                  <ScriptTypeSelect
+                    color="#c4c4c4"
+                    value={preferredLibrary ?? ScriptType.Playwright}
+                    onChange={setPreferredLibrary}
+                    shortDescription
+                  />
+                </div>
+              </div>
               <div className="my-8">
                 <span
                   className="link-button"
