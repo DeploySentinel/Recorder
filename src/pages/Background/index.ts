@@ -36,15 +36,17 @@ async function onNavEvent(
   details: chrome.webNavigation.WebNavigationTransitionCallbackDetails
 ) {
   const { tabId, url, transitionType, transitionQualifiers, frameId } = details;
-  const { recording, recordingTabId, recordingState } = await localStorageGet([
-    'recording',
-    'recordingState',
-    'recordingTabId',
-  ]);
+  const { recording, recordingTabId, recordingFrameId, recordingState } =
+    await localStorageGet([
+      'recording',
+      'recordingState',
+      'recordingTabId',
+      'recordingFrameId',
+    ]);
 
   // Check if it's a parent frame, we're recording, and it's the right tabid
   if (
-    frameId !== 0 ||
+    frameId !== recordingFrameId ||
     recordingState !== 'active' ||
     recordingTabId !== tabId
   ) {
@@ -75,7 +77,7 @@ chrome.runtime.onMessage.addListener(async function (
       throw new Error('New tab id not defined');
     }
 
-    setStartRecordingStorage(tabId, newUrl, testEditorTabId);
+    setStartRecordingStorage(tabId, 0, newUrl, testEditorTabId);
   } else if (request.type === 'forward-recording') {
     // Focus the original deploysentinel webapp tab post-recording
     chrome.tabs.update(request.tabId, { active: true });
@@ -103,19 +105,22 @@ chrome.webNavigation.onCommitted.addListener(onNavEvent);
 chrome.webNavigation.onCompleted.addListener(async (details) => {
   const { tabId, frameId } = details;
 
-  if (frameId !== 0) {
+  const { recordingTabId, recordingFrameId, recordingState } =
+    await localStorageGet([
+      'recordingTabId',
+      'recordingFrameId',
+      'recordingState',
+    ]);
+
+  if (
+    frameId !== recordingFrameId ||
+    tabId != recordingTabId ||
+    recordingState != 'active'
+  ) {
     return;
   }
 
-  const { recordingTabId, recordingState } = await localStorageGet([
-    'recordingTabId',
-    'recordingState',
-  ]);
-  if (tabId != recordingTabId || recordingState != 'active') {
-    return;
-  }
-
-  executeScript(tabId, 'contentScript.bundle.js');
+  executeScript(tabId, recordingFrameId, 'contentScript.bundle.js');
 });
 
 chrome.contextMenus.removeAll();

@@ -19,9 +19,17 @@ import ActionList from './ActionList';
 import CodeGen from './CodeGen';
 import genSelectors, { getBestSelectorForAction } from '../builders/selector';
 import { genCode } from '../builders';
+import ScriptTypeSelect from '../Common/ScriptTypeSelect';
+import { usePreferredLibrary, usePreferredBarPosition } from '../Common/hooks';
 
 import type { Action } from '../types';
-import { ActionType, ActionsMode, ScriptType, TagName } from '../types';
+import {
+  ActionType,
+  ActionsMode,
+  ScriptType,
+  TagName,
+  BarPosition,
+} from '../types';
 
 import ControlBarStyle from './ControlBar.css';
 import { endRecording } from '../Common/endRecording';
@@ -100,6 +108,10 @@ function isElementFromOverlay(element: HTMLElement) {
 }
 
 export default function ControlBar({ onExit }: { onExit: () => void }) {
+  const [barPosition, setBarPosition] = usePreferredBarPosition(
+    BarPosition.Bottom
+  );
+
   const [hoveredElement, setHoveredElement] = useState<HTMLElement | null>(
     null
   );
@@ -114,9 +126,7 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
   const [showActionsMode, setShowActionsMode] = useState<ActionsMode>(
     ActionsMode.Code
   );
-  const [scriptType, setScriptType] = useState<ScriptType>(
-    ScriptType.Playwright
-  );
+  const [preferredLibrary, setPreferredLibrary] = usePreferredLibrary();
 
   const [copyCodeConfirm, setCopyCodeConfirm] = useState<boolean>(false);
   const [screenshotConfirm, setScreenshotConfirm] = useState<boolean>(false);
@@ -133,7 +143,6 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
 
     // Show Code
     setShowAllActions(true);
-    setScriptType(ScriptType.Playwright);
 
     // Clear out highlighter
     document.removeEventListener('mousemove', handleMouseMoveRef.current, true);
@@ -199,6 +208,8 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
     });
   }, []);
 
+  const displayedScriptType = preferredLibrary ?? ScriptType.Playwright;
+
   const rect = hoveredElement?.getBoundingClientRect();
   const displayedSelector = getBestSelectorForAction(
     {
@@ -213,7 +224,7 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
         hoveredElement?.children?.length === 0 &&
         hoveredElement?.innerText?.length > 0,
     },
-    ScriptType.Playwright
+    displayedScriptType
   );
 
   if (isOpen === false) {
@@ -230,6 +241,11 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
         className="ControlBar rr-ignore"
         id="overlay-controls"
         style={{
+          ...(barPosition === BarPosition.Bottom
+            ? {
+                bottom: 35,
+              }
+            : { top: 35 }),
           height: showAllActions ? 330 : 100,
         }}
       >
@@ -275,8 +291,18 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
             <div className="w-100 p-4">
               <div className="d-flex justify-between" style={{ fontSize: 14 }}>
                 <div className="text-grey">Last Action</div>
-                <div className="d-flex">
-                  <div className="text-red">Recording</div>
+                <div
+                  className="text-grey text-sm text-button"
+                  onClick={() =>
+                    setBarPosition(
+                      barPosition === BarPosition.Bottom
+                        ? BarPosition.Top
+                        : BarPosition.Bottom
+                    )
+                  }
+                >
+                  Move Overlay to{' '}
+                  {barPosition === BarPosition.Bottom ? 'Top' : 'Bottom'}
                 </div>
               </div>
               <div
@@ -295,7 +321,7 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
                   }
                   onClick={() => setShowAllActions(!showAllActions)}
                 >
-                  {showAllActions ? 'Show Less' : 'Show More'}{' '}
+                  {showAllActions ? 'Collapse Overlay' : 'Expand Overlay'}{' '}
                   <FontAwesomeIcon
                     icon={showAllActions ? faChevronUp : faChevronDown}
                   />
@@ -351,31 +377,12 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
               <div>
                 {showActionsMode === ActionsMode.Code && (
                   <>
-                    <select
-                      className="link-button mr-4"
-                      style={{
-                        backgroundColor: '#080a0b',
-                        color: 'white',
-                        border: 'none',
-                        outline: 'none',
-                      }}
-                      onChange={(e) =>
-                        setScriptType(e.target.value as ScriptType)
-                      }
-                      value={scriptType}
-                    >
-                      <option value={ScriptType.Playwright}>
-                        Playwright Library
-                      </option>
-                      <option value={ScriptType.Puppeteer}>
-                        Puppeteer Library
-                      </option>
-                      <option value={ScriptType.Cypress}>
-                        Cypress Library
-                      </option>
-                    </select>
+                    <ScriptTypeSelect
+                      value={displayedScriptType}
+                      onChange={setPreferredLibrary}
+                    />
                     <CopyToClipboard
-                      text={genCode(actions, true, scriptType)}
+                      text={genCode(actions, true, displayedScriptType)}
                       onCopy={() => {
                         setCopyCodeConfirm(true);
                         setTimeout(() => {
@@ -401,7 +408,7 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
             </div>
 
             {showActionsMode === ActionsMode.Code && (
-              <CodeGen actions={actions} library={scriptType} />
+              <CodeGen actions={actions} library={displayedScriptType} />
             )}
             {showActionsMode === ActionsMode.Actions && (
               <ActionList actions={actions} />

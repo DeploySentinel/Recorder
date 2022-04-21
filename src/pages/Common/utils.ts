@@ -2,18 +2,29 @@ export function setEndRecordingStorage() {
   chrome.storage.local.set({
     recordingState: 'finished',
     recordingTabId: null,
+    recordingFrameId: null,
     returnTabId: null,
   });
 }
 
+export function setPreferredLibraryStorage(library: string) {
+  chrome.storage.local.set({ preferredLibrary: library });
+}
+
+export function setPreferredBarPositionStorage(position: string) {
+  chrome.storage.local.set({ preferredBarPosition: position });
+}
+
 export function setStartRecordingStorage(
   tabId: number,
+  frameId: number,
   newUrl: string,
   returnTabId?: number
 ) {
   const storage = {
     recordingState: 'active',
     recordingTabId: tabId,
+    recordingFrameId: frameId,
     recording: [
       {
         type: 'load',
@@ -72,20 +83,47 @@ export async function getCurrentTab(): Promise<chrome.tabs.Tab> {
   return tab;
 }
 
-export async function executeScript(tabId: number, file: string) {
+// Determins if the current tab is a Cypress test tab
+export function isCypressBrowser(tabId: number) {
   if (typeof browser === 'object') {
-    await browser.tabs.executeScript(tabId, { file });
+    return browser.tabs
+      .executeScript(tabId, {
+        code: `document.querySelector('script[src*="/__cypress"]') != null`,
+      })
+      .then((result) => (result?.[0] ?? false) as boolean);
+  } else {
+    return new Promise((resolve, reject) => {
+      chrome.scripting.executeScript(
+        {
+          target: { tabId },
+          func: () =>
+            document.querySelector('script[src*="/__cypress"]') != null,
+        },
+        (executedScript) => resolve(executedScript?.[0]?.result ?? false)
+      );
+    });
+  }
+}
+
+export async function executeScript(
+  tabId: number,
+  frameId: number,
+  file: string
+) {
+  if (typeof browser === 'object') {
+    await browser.tabs.executeScript(tabId, { file, frameId });
   } else {
     await chrome.scripting.executeScript({
-      target: { tabId },
+      target: { tabId, frameIds: [frameId] },
       files: [file],
     });
   }
 }
 
-export async function executeCleanUp(tabId: number) {
+export async function executeCleanUp(tabId: number, frameId: number) {
   if (typeof browser === 'object') {
     await browser.tabs.executeScript(tabId, {
+      frameId,
       code: `
         if (typeof window?.__DEPLOYSENTINEL_CLEAN_UP === 'function') {
           window.__DEPLOYSENTINEL_CLEAN_UP();
@@ -94,7 +132,7 @@ export async function executeCleanUp(tabId: number) {
     });
   } else {
     await chrome.scripting.executeScript({
-      target: { tabId },
+      target: { tabId, frameIds: [frameId] },
       func: () => {
         if (typeof window?.__DEPLOYSENTINEL_CLEAN_UP === 'function') {
           window.__DEPLOYSENTINEL_CLEAN_UP();
