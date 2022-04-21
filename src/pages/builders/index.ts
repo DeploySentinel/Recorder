@@ -90,13 +90,13 @@ export class ActionContext extends BaseAction {
       case ActionType.Click:
         return `Click on <${tagName.toLowerCase()}> ${
           selectors.text != null && selectors.text.length > 0
-            ? `"${truncateText(selectors.text.replace('\n', ' '), 25)}"`
+            ? `"${truncateText(selectors.text.replace(/\s/g, ' '), 25)}"`
             : getBestSelectorForAction(this.action, this.scriptType)
         }`;
       case ActionType.Hover:
         return `Hover over <${tagName.toLowerCase()}> ${
           selectors.text != null && selectors.text.length > 0
-            ? `"${truncateText(selectors.text.replace('\n', ' '), 25)}"`
+            ? `"${truncateText(selectors.text.replace(/\s/g, ' '), 25)}"`
             : getBestSelectorForAction(this.action, this.scriptType)
         }`;
       case ActionType.Input:
