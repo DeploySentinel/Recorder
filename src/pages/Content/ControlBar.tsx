@@ -167,7 +167,10 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
         y = event.clientY,
         elementMouseIsOver = document.elementFromPoint(x, y) as HTMLElement;
 
-      if (!isElementFromOverlay(elementMouseIsOver)) {
+      if (
+        !isElementFromOverlay(elementMouseIsOver) &&
+        elementMouseIsOver != null
+      ) {
         const { parentElement } = elementMouseIsOver;
         // Match the logic in recorder.ts for link clicks
         const element =
@@ -284,7 +287,7 @@ export default function ControlBar({ onExit }: { onExit: () => void }) {
         ) : (
           <div className="d-flex items-center">
             <ActionButton
-              label="End Test"
+              label="End Rec"
               onClick={() => onEndRecording()}
               testId="end-test"
             >

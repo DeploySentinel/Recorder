@@ -41,6 +41,13 @@ var options = {
     background: path.join(__dirname, 'src', 'pages', 'Background', 'index.ts'),
     contentScript: path.join(__dirname, 'src', 'pages', 'Content', 'index.tsx'),
     bridge: path.join(__dirname, 'src', 'pages', 'Bridge', 'index.ts'),
+    cypressTrigger: path.join(
+      __dirname,
+      'src',
+      'pages',
+      'CypressTrigger',
+      'index.tsx'
+    ),
   },
   chromeExtensionBoilerplate: {
     notHotReload: ['contentScript' /*, 'devtools'*/],
