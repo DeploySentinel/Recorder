@@ -57,8 +57,8 @@ export function useRecordingState() {
   useEffect(() => {
     localStorageGet(['recording', 'recordingTabId']).then(
       ({ recording, recordingTabId }) => {
-        setActions(recording || []);
-        setRecordingTabId(recordingTabId || null);
+        setActions(recording ?? []);
+        setRecordingTabId(recordingTabId ?? null);
       }
     );
 

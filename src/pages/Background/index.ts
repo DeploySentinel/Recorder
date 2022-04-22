@@ -133,8 +133,8 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
   if (
     frameId === 0 &&
     isCypress == null &&
-    url.indexOf('/integration') > 0 &&
-    url.indexOf('#') > 0
+    url.includes('/integration') &&
+    url.includes('#')
   ) {
     // Check if it really is a cy tab
     const isCy = await isCypressBrowser(tabId);
