@@ -122,6 +122,13 @@ export class ActionContext extends BaseAction {
           JSON.stringify(this.action.text),
           25
         )} to appear`;
+      case ActionType.DragAndDrop:
+        return `Drag n drop ${getBestSelectorForAction(
+          this.action,
+          this.scriptType
+        )} from (${this.action.sourceX}, ${this.action.sourceY}) to (${
+          this.action.targetX
+        }, ${this.action.targetY})`;
       default:
         return '';
     }
@@ -182,6 +189,13 @@ export abstract class ScriptBuilder {
     deltaY: number,
     pageXOffset?: number,
     pageYOffset?: number
+  ) => this;
+
+  abstract dragAndDrop: (
+    sourceX: number,
+    sourceY: number,
+    targetX: number,
+    targetY: number
   ) => this;
 
   abstract fullScreenshot: () => this;
@@ -255,6 +269,14 @@ export abstract class ScriptBuilder {
         break;
       case ActionType.AwaitText:
         this.awaitText(action.text);
+        break;
+      case ActionType.DragAndDrop:
+        this.dragAndDrop(
+          action.sourceX,
+          action.sourceY,
+          action.targetX,
+          action.targetY
+        );
         break;
       default:
         break;
@@ -399,6 +421,23 @@ export class PlaywrightScriptBuilder extends ScriptBuilder {
     return this;
   };
 
+  dragAndDrop = (
+    sourceX: number,
+    sourceY: number,
+    targetX: number,
+    targetY: number
+  ) => {
+    this.pushCodes(
+      [
+        `await page.mouse.move(${sourceX}, ${sourceY});`,
+        '  await page.mouse.down();',
+        `  await page.mouse.move(${targetX}, ${targetY});`,
+        '  await page.mouse.up();',
+      ].join('\n')
+    );
+    return this;
+  };
+
   buildScript = () => {
     return `import { test, expect } from '@playwright/test';
 
@@ -538,6 +577,23 @@ export class PuppeteerScriptBuilder extends ScriptBuilder {
     return this;
   };
 
+  dragAndDrop = (
+    sourceX: number,
+    sourceY: number,
+    targetX: number,
+    targetY: number
+  ) => {
+    this.pushCodes(
+      [
+        `await page.mouse.move(${sourceX}, ${sourceY});`,
+        '  await page.mouse.down();',
+        `  await page.mouse.move(${targetX}, ${targetY});`,
+        '  await page.mouse.up();',
+      ].join('\n')
+    );
+    return this;
+  };
+
   buildScript = () => {
     return `const puppeteer = require('puppeteer');
 (async () => {
@@ -614,6 +670,17 @@ export class CypressScriptBuilder extends ScriptBuilder {
 
   awaitText = (text: string) => {
     this.pushCodes(`cy.contains('${text}');`);
+    return this;
+  };
+
+  dragAndDrop = (
+    sourceX: number,
+    sourceY: number,
+    targetX: number,
+    targetY: number
+  ) => {
+    // TODO -> IMPLEMENT ME
+    this.pushCodes('');
     return this;
   };
 

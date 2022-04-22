@@ -17,6 +17,7 @@ export enum ScriptType {
 export enum ActionType {
   AwaitText = 'awaitText',
   Click = 'click',
+  DragAndDrop = 'dragAndDrop',
   FullScreenshot = 'fullScreenshot',
   Hover = 'hover',
   Input = 'input',
@@ -42,15 +43,16 @@ export enum TagName {
 // (TODO) -> move to utils
 export const isSupportedActionType = (actionType: any) => {
   return [
+    ActionType.AwaitText,
     ActionType.Click,
+    ActionType.DragAndDrop,
+    ActionType.FullScreenshot,
     ActionType.Hover,
-    ActionType.Keydown,
     ActionType.Input,
+    ActionType.Keydown,
     ActionType.Load,
     ActionType.Resize,
     ActionType.Wheel,
-    ActionType.FullScreenshot,
-    ActionType.AwaitText,
   ].includes(actionType);
 };
 
@@ -76,6 +78,14 @@ class InputAction extends BaseAction {
 
 class ClickAction extends BaseAction {
   type: ActionType.Click;
+}
+
+class DragAndDropAction extends BaseAction {
+  type: ActionType.DragAndDrop;
+  sourceX: number;
+  sourceY: number;
+  targetX: number;
+  targetY: number;
 }
 
 class HoverAction extends BaseAction {
@@ -120,6 +130,7 @@ export type Action =
   | KeydownAction
   | InputAction
   | ClickAction
+  | DragAndDropAction
   | HoverAction
   | LoadAction
   | NavigateAction

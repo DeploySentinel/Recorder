@@ -66,17 +66,17 @@ const ActionButton = ({
 function RenderActionText({ action }: { action: Action }) {
   return (
     <>
-      {action?.type === 'click'
+      {action.type === ActionType.Click
         ? `Click on ${action.tagName.toLowerCase()} ${getBestSelectorForAction(
             action,
             ScriptType.Playwright
           )}`
-        : action.type === 'hover'
+        : action.type === ActionType.Hover
         ? `Hover over ${action.tagName.toLowerCase()} ${getBestSelectorForAction(
             action,
             ScriptType.Playwright
           )}`
-        : action?.type === 'input'
+        : action.type === ActionType.Input
         ? `Fill "${
             action.isPassword
               ? '*'.repeat(action?.value?.length ?? 0)
@@ -85,18 +85,20 @@ function RenderActionText({ action }: { action: Action }) {
             action,
             ScriptType.Playwright
           )}`
-        : action?.type == 'keydown'
+        : action.type === ActionType.Keydown
         ? `Press ${action.key} on ${action.tagName.toLowerCase()}`
-        : action?.type == 'load'
+        : action.type === ActionType.Load
         ? `Load "${action.url}"`
-        : action.type === 'resize'
+        : action.type === ActionType.Resize
         ? `Resize window to ${action.width} x ${action.height}`
-        : action.type === 'wheel'
+        : action.type === ActionType.Wheel
         ? `Scroll wheel by X:${action.deltaX}, Y:${action.deltaY}`
-        : action.type === 'fullScreenshot'
+        : action.type === ActionType.FullScreenshot
         ? `Take full page screenshot`
-        : action.type === 'awaitText'
+        : action.type === ActionType.AwaitText
         ? `Wait for text "${action.text}"`
+        : action.type === ActionType.DragAndDrop
+        ? `Drag n Drop from (${action.sourceX}, ${action.sourceY}) to (${action.targetX}, ${action.targetY})`
         : ''}
     </>
   );
