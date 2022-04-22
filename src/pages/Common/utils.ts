@@ -105,6 +105,25 @@ export function isCypressBrowser(tabId: number) {
   }
 }
 
+export function getCypressAutFrame(tabId: number) {
+  return new Promise<chrome.webNavigation.GetAllFrameResultDetails>(
+    (resolve, reject) => {
+      chrome.webNavigation.getAllFrames({ tabId }, (frames) => {
+        const autFrame = frames?.filter((frame) => {
+          // Must be child of parent frame and not have "__cypress" in the url
+          return (
+            frame.parentFrameId === 0 && frame.url.indexOf('__cypress') === -1
+          );
+        })?.[0];
+        if (autFrame == null || autFrame.frameId == null) {
+          return reject(new Error('No AUT frame found'));
+        }
+        resolve(autFrame);
+      });
+    }
+  );
+}
+
 export async function executeScript(
   tabId: number,
   frameId: number,

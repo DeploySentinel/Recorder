@@ -119,6 +119,12 @@
 .p-4 {
   padding: 1em;
 }
+.px-3 {
+  padding: 0 0.75em;
+}
+.px-4 {
+  padding: 0 1em;
+}
 
 /* Margin Utils */
 .m-4 {
@@ -199,4 +205,8 @@
 }
 .text-decoration-none {
   text-decoration: none !important;
+}
+
+.cypress-trigger:hover {
+  background: #e9e9e9;
 }

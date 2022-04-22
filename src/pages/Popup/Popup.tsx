@@ -17,13 +17,13 @@ import { endRecording } from '../Common/endRecording';
 import { genCode } from '../builders';
 import {
   setStartRecordingStorage,
-  localStorageGet,
   getCurrentTab,
   executeScript,
   executeCleanUp,
   isCypressBrowser,
+  getCypressAutFrame,
 } from '../Common/utils';
-import { usePreferredLibrary } from '../Common/hooks';
+import { usePreferredLibrary, useRecordingState } from '../Common/hooks';
 import ScriptTypeSelect from '../Common/ScriptTypeSelect';
 
 import type { Action } from '../types';
@@ -130,41 +130,18 @@ function LastStepPanel({
 const Popup = () => {
   const [preferredLibrary, setPreferredLibrary] = usePreferredLibrary();
 
-  const [recordingTabId, setRecordingTabId] = useState<number | null>(null);
-  const [currentTabId, setCurrentTabId] = useState<number | null>(null);
+  const [recordingTabId, actions] = useRecordingState();
 
-  const [actions, setActions] = useState<Action[]>([]);
+  const [currentTabId, setCurrentTabId] = useState<number | null>(null);
 
   const [isShowingLastTest, setIsShowingLastTest] = useState<boolean>(false);
 
   const [showBetaCTA, setShowBetaCTA] = useState<boolean>(false);
 
   useEffect(() => {
-    localStorageGet(['recording', 'recordingTabId']).then(
-      ({ recording, recordingTabId }) => {
-        setActions(recording || []);
-        setRecordingTabId(recordingTabId || null);
-      }
-    );
-
     getCurrentTab().then((tab) => {
       const { id } = tab;
       setCurrentTabId(id ?? null);
-    });
-
-    chrome.storage.onChanged.addListener((changes) => {
-      if (
-        changes.recordingTabId != null &&
-        changes.recordingTabId.newValue != changes.recordingTabId.oldValue
-      ) {
-        setRecordingTabId(changes.recordingTabId.newValue);
-      }
-      if (
-        changes.recording != null &&
-        changes.recording.newValue != changes.recording.oldValue
-      ) {
-        setActions(changes.recording.newValue);
-      }
     });
   }, []);
 
@@ -182,25 +159,6 @@ const Popup = () => {
       }
     })();
   }, []);
-
-  function getCypressAutFrame(tabId: number) {
-    return new Promise<chrome.webNavigation.GetAllFrameResultDetails>(
-      (resolve, reject) => {
-        chrome.webNavigation.getAllFrames({ tabId }, (frames) => {
-          const autFrame = frames?.filter((frame) => {
-            // Must be child of parent frame and not have "__cypress" in the url
-            return (
-              frame.parentFrameId === 0 && frame.url.indexOf('__cypress') === -1
-            );
-          })?.[0];
-          if (autFrame == null || autFrame.frameId == null) {
-            return reject(new Error('No AUT frame found'));
-          }
-          resolve(autFrame);
-        });
-      }
-    );
-  }
 
   const onRecordNewTestClick = async () => {
     onNewRecording();

@@ -4,6 +4,9 @@ import {
   localStorageGet,
   executeScript,
   createTab,
+  isCypressBrowser,
+  getCypressAutFrame,
+  executeCleanUp,
 } from '../Common/utils';
 
 const HOVER_CTX_MENU_ID = 'deploysentinel-menu-id';
@@ -87,6 +90,19 @@ chrome.runtime.onMessage.addListener(async function (
       code: request.code,
       actions: request.actions,
     });
+  } else if (request.type === 'cypress-trigger-start-recording') {
+    const tabId = sender.tab?.id;
+
+    if (tabId == null) {
+      throw new Error('Cypress tab not defined');
+    }
+
+    const autFrame = await getCypressAutFrame(tabId);
+    const { url, frameId } = autFrame;
+
+    setStartRecordingStorage(tabId, frameId, url);
+    await executeCleanUp(tabId, frameId);
+    await executeScript(tabId, frameId, 'contentScript.bundle.js');
   }
 });
 
@@ -103,14 +119,29 @@ chrome.webNavigation.onReferenceFragmentUpdated.addListener(onNavEvent);
 chrome.webNavigation.onCommitted.addListener(onNavEvent);
 
 chrome.webNavigation.onCompleted.addListener(async (details) => {
-  const { tabId, frameId } = details;
+  const { tabId, frameId, url } = details;
 
-  const { recordingTabId, recordingFrameId, recordingState } =
+  const { recordingTabId, recordingFrameId, recordingState, isCypress } =
     await localStorageGet([
       'recordingTabId',
       'recordingFrameId',
       'recordingState',
+      'isCypress',
     ]);
+
+  // If we believe this may be a Cypress test tab based on URL
+  if (
+    frameId === 0 &&
+    isCypress == null &&
+    url.indexOf('/integration') > 0 &&
+    url.indexOf('#') > 0
+  ) {
+    // Check if it really is a cy tab
+    const isCy = await isCypressBrowser(tabId);
+    if (isCy) {
+      await executeScript(tabId, 0, 'cypressTrigger.bundle.js');
+    }
+  }
 
   if (
     frameId !== recordingFrameId ||

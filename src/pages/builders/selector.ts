@@ -77,6 +77,7 @@ export default function genSelectors(element: HTMLElement | null) {
     'data-testing',
     'data-test',
     'data-qa',
+    'data-cy',
   ]);
 
   // We won't use an id selector if the id is invalid (starts with a number)
