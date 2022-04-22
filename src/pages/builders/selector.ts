@@ -80,13 +80,18 @@ export default function genSelectors(element: HTMLElement | null) {
   ]);
 
   // We won't use an id selector if the id is invalid (starts with a number)
-  const idSelector =
-    isAttributesDefined(element, ['id']) && !isCharacterNumber(element.id?.[0])
-      ? // Certain apps don't have unique ids (ex. youtube)
-        finder(element, {
-          attr: (name) => name === 'id',
-        })
-      : null;
+  let idSelector = null;
+  try {
+    idSelector =
+      isAttributesDefined(element, ['id']) &&
+      !isCharacterNumber(element.id?.[0])
+        ? // Certain apps don't have unique ids (ex. youtube)
+          finder(element, {
+            attr: (name) => name === 'id',
+          })
+        : null;
+  } catch (e) {}
+
   return {
     id: idSelector,
     generalSelector,
