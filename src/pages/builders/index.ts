@@ -610,42 +610,42 @@ ${this.codes.join('')}
 export class CypressScriptBuilder extends ScriptBuilder {
   // Cypress automatically detects and waits for the page to finish loading
   click = (selector: string, causesNavigation: boolean) => {
-    this.pushCodes(`cy.get('${selector}').click()`);
+    this.pushCodes(`cy.get('${selector}').click();`);
     return this;
   };
 
   hover = (selector: string, causesNavigation: boolean) => {
-    this.pushCodes(`cy.get('${selector}').trigger('mouseover')`);
+    this.pushCodes(`cy.get('${selector}').trigger('mouseover');`);
     return this;
   };
 
   load = (url: string) => {
-    this.pushCodes(`cy.visit('${url}')`);
+    this.pushCodes(`cy.visit('${url}');`);
     return this;
   };
 
   resize = (width: number, height: number) => {
-    this.pushCodes(`cy.viewport(${width}, ${height})`);
+    this.pushCodes(`cy.viewport(${width}, ${height});`);
     return this;
   };
 
   fill = (selector: string, value: string, causesNavigation: boolean) => {
-    this.pushCodes(`cy.get('${selector}').type(${JSON.stringify(value)})`);
+    this.pushCodes(`cy.get('${selector}').type(${JSON.stringify(value)});`);
     return this;
   };
 
   type = (selector: string, value: string, causesNavigation: boolean) => {
-    this.pushCodes(`cy.get('${selector}').type(${JSON.stringify(value)})`);
+    this.pushCodes(`cy.get('${selector}').type(${JSON.stringify(value)});`);
     return this;
   };
 
   select = (selector: string, option: string, causesNavigation: boolean) => {
-    this.pushCodes(`cy.get('${selector}').select('${option}')`);
+    this.pushCodes(`cy.get('${selector}').select('${option}');`);
     return this;
   };
 
   keydown = (selector: string, key: string, causesNavigation: boolean) => {
-    this.pushCodes(`cy.get('${selector}').type('{${key}}')`);
+    this.pushCodes(`cy.get('${selector}').type('{${key}}');`);
     return this;
   };
 
@@ -658,18 +658,18 @@ export class CypressScriptBuilder extends ScriptBuilder {
     this.pushCodes(
       `cy.scrollTo(${Math.floor(pageXOffset ?? 0)}, ${Math.floor(
         pageYOffset ?? 0
-      )})`
+      )});`
     );
     return this;
   };
 
   fullScreenshot = () => {
-    this.pushCodes(`cy.screenshot()`);
+    this.pushCodes(`cy.screenshot();`);
     return this;
   };
 
   awaitText = (text: string) => {
-    this.pushCodes(`cy.contains('${text}')`);
+    this.pushCodes(`cy.contains('${text}');`);
     return this;
   };
 
@@ -687,7 +687,7 @@ export class CypressScriptBuilder extends ScriptBuilder {
   buildScript = () => {
     return `it('Written with DeploySentinel Recorder', () => {${this.codes.join(
       ''
-    )}})`;
+    )}});`;
   };
 }
 

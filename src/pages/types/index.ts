@@ -3,6 +3,11 @@ export enum ActionsMode {
   Code = 'code',
 }
 
+export enum BarPosition {
+  Top = 'top',
+  Bottom = 'bottom',
+}
+
 export enum ScriptType {
   Puppeteer = 'puppeteer',
   Playwright = 'playwright',
