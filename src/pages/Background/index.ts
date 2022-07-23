@@ -114,34 +114,31 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
   }
 });
 
-chrome.webNavigation.onHistoryStateUpdated.addListener(onNavEvent);
-chrome.webNavigation.onReferenceFragmentUpdated.addListener(onNavEvent);
-chrome.webNavigation.onCommitted.addListener(onNavEvent);
-
-chrome.webNavigation.onCompleted.addListener(async (details) => {
-  const { tabId, frameId, url } = details;
-
-  const { recordingTabId, recordingFrameId, recordingState, isCypress } =
-    await localStorageGet([
-      'recordingTabId',
-      'recordingFrameId',
-      'recordingState',
-      'isCypress',
-    ]);
-
-  // If we believe this may be a Cypress test tab based on URL
-  if (
-    frameId === 0 &&
-    isCypress == null &&
-    url.includes('/integration') &&
-    url.includes('#')
-  ) {
+// Cypress runner will not trigger navigation due to hash path changes
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  const { url } = changeInfo;
+  if (url && url.includes('/specs/runner?file=') && url.includes('#')) {
     // Check if it really is a cy tab
     const isCy = await isCypressBrowser(tabId);
     if (isCy) {
       await executeScript(tabId, 0, 'cypressTrigger.bundle.js');
     }
   }
+});
+
+chrome.webNavigation.onHistoryStateUpdated.addListener(onNavEvent);
+chrome.webNavigation.onReferenceFragmentUpdated.addListener(onNavEvent);
+chrome.webNavigation.onCommitted.addListener(onNavEvent);
+
+chrome.webNavigation.onCompleted.addListener(async (details) => {
+  const { tabId, frameId } = details;
+
+  const { recordingTabId, recordingFrameId, recordingState } =
+    await localStorageGet([
+      'recordingTabId',
+      'recordingFrameId',
+      'recordingState',
+    ]);
 
   if (
     frameId !== recordingFrameId ||

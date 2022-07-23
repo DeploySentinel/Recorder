@@ -70,11 +70,11 @@ const retrySelector = (selector: string, maxRetries: number) => {
 (async () => {
   // Fetch nodes we need to mount to with retry
   const urlBar = await retrySelector(
-    '#app .runner.container .sel-url-wrap',
+    '#spec-runner-header > div.flex:first-child',
     20
   );
   const selectorPlaygroundButton = await retrySelector(
-    '#app .runner.container .sel-url-wrap *:first-child',
+    '#spec-runner-header [data-cy="aut-url"]',
     20
   );
   if (selectorPlaygroundButton == null || urlBar == null) {
