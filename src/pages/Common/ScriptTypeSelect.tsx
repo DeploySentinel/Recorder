@@ -26,6 +26,7 @@ export default function ScriptTypeSelect({
       }}
       onChange={(e) => onChange(e.target.value as ScriptType)}
       value={value}
+      data-testid="script-type-select"
     >
       <option value={ScriptType.Playwright}>
         Playwright{!shortDescription ? ' Library' : ''}

@@ -29,7 +29,7 @@ export async function onPageView(pageName: string) {
   } catch (e) {}
 }
 
-export async function onNewRecording() {
+export async function onNewRecording(label: string) {
   try {
     var gaParams = new URLSearchParams();
     gaParams.append('v', '1');
@@ -38,6 +38,7 @@ export async function onNewRecording() {
     gaParams.append('t', 'event');
     gaParams.append('ec', 'Recording');
     gaParams.append('ea', 'start');
+    gaParams.append('el', label);
 
     await postData(ANALYTICS_PATH, gaParams);
   } catch (e) {}

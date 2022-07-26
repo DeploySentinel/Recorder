@@ -48,7 +48,7 @@ function LastStepPanel({
   );
   const [copyCodeConfirm, setCopyCodeConfirm] = useState<boolean>(false);
 
-  const displayedScriptType = preferredLibrary ?? ScriptType.Playwright;
+  const displayedScriptType = preferredLibrary ?? ScriptType.Cypress;
 
   return (
     <div>
@@ -136,7 +136,9 @@ const Popup = () => {
 
   const [isShowingLastTest, setIsShowingLastTest] = useState<boolean>(false);
 
-  const [showBetaCTA, setShowBetaCTA] = useState<boolean>(false);
+  const [showBetaCTA, setShowBetaCTA] = useState<boolean>(
+    localStorage.getItem('showBetaCta') !== 'false'
+  );
 
   useEffect(() => {
     getCurrentTab().then((tab) => {
@@ -161,7 +163,7 @@ const Popup = () => {
   }, []);
 
   const onRecordNewTestClick = async () => {
-    onNewRecording();
+    onNewRecording(preferredLibrary ?? ScriptType.Cypress);
 
     const currentTab = await getCurrentTab();
     const tabId = currentTab.id;
@@ -280,7 +282,7 @@ const Popup = () => {
                   <div>Preferred Library: &nbsp;</div>
                   <ScriptTypeSelect
                     color="#c4c4c4"
-                    value={preferredLibrary ?? ScriptType.Playwright}
+                    value={preferredLibrary ?? ScriptType.Cypress}
                     onChange={setPreferredLibrary}
                     shortDescription
                   />
@@ -297,39 +299,42 @@ const Popup = () => {
                   View Last Recording
                 </span>
               </div>
-              {showBetaCTA && (
-                <div
-                  style={{ background: '#2e273b' }}
-                  className="rounded p-3 text-left mt-12"
-                >
-                  <div className="fw-bold">
-                    Join the free DeploySentinel Beta
+              {showBetaCTA &&
+                (preferredLibrary === ScriptType.Cypress ||
+                  preferredLibrary == null) && (
+                  <div
+                    style={{ background: '#21272e' }}
+                    className="rounded p-3 text-left mt-12"
+                  >
+                    <div className="fw-bold">
+                      <FontAwesomeIcon icon={faInfoCircle} className="mr-2" />
+                      Fix Flaky Cypress Tests w/ DeploySentinel
+                    </div>
+                    <div className="mt-4" style={{ lineHeight: '1.5rem' }}>
+                      Save time debugging test failures & flakes using DOM,
+                      network, and console events captured while running in CI.
+                    </div>
+                    <div className="mt-4">
+                      <a
+                        href="https://deploysentinel.com?utm_source=rcd&utm_medium=bnr"
+                        target="_blank"
+                        className="link-button text-decoration-none fw-bold mr-5"
+                      >
+                        Learn More
+                      </a>
+                      <span
+                        className="text-button text-grey"
+                        onClick={() => {
+                          localStorage?.setItem('showBetaCta', 'false');
+                          setShowBetaCTA(false);
+                        }}
+                        data-testid="view-last-test"
+                      >
+                        No Thanks
+                      </span>
+                    </div>
                   </div>
-                  <div className="mt-4" style={{ lineHeight: '1.5rem' }}>
-                    Monitor your site 24/7 and get alerted on issues by
-                    deploying Playwright tests on DeploySentinel.
-                  </div>
-                  <div className="mt-4">
-                    <a
-                      href="https://deploysentinel.com?utm_source=rcd&utm_medium=bnr"
-                      target="_blank"
-                      className="link-button text-decoration-none fw-bold mr-5"
-                    >
-                      Learn More
-                    </a>
-                    <span
-                      className="text-button text-grey"
-                      onClick={() => {
-                        localStorage?.setItem('showBetaCta', 'false');
-                        setShowBetaCTA(false);
-                      }}
-                      data-testid="view-last-test"
-                    >
-                      No Thanks
-                    </span>
-                  </div>
-                </div>
-              )}
+                )}
             </div>
           </>
         )}

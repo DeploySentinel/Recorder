@@ -121,6 +121,9 @@ test('can click through recording steps and it generates the right code', async 
   await page.goto(`chrome-extension://${extensionId}/popup.html`);
   await page.click('[data-testid="end-test-recording"]');
   await page.click('[data-testid="view-last-test"]');
+  await page
+    .locator('[data-testid="script-type-select"]')
+    .selectOption('playwright');
 
   // Grab code generated
   const content = await page.textContent('[data-testid="code-block"]');

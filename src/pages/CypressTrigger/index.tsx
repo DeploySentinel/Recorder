@@ -81,10 +81,15 @@ const retrySelector = (selector: string, maxRetries: number) => {
     throw new Error('Could not find insertion element');
   }
 
-  const target = urlBar.insertBefore(
-    document.createElement('DIV'),
-    selectorPlaygroundButton
-  );
+  // Prevent the button from being mounted multiple times (bug in FF)
+  if (
+    document.getElementById('deploysentinel-cypress-trigger-button') != null
+  ) {
+    return;
+  }
+  const newElem = document.createElement('div');
+  newElem.id = 'deploysentinel-cypress-trigger-button';
+  const target = urlBar.insertBefore(newElem, selectorPlaygroundButton);
   target.attachShadow({ mode: 'open' });
   render(
     <>
