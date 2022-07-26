@@ -13,6 +13,9 @@ or Puppeteer script.
 [![Chrome Store Icon](assets/ChromeStoreIcon.png)](https://chrome.google.com/webstore/detail/deploysentinel-recorder/geggbdbnidkhbnbjoganapfhkpgkndfo)
 [![Firefox Addon Icon](assets/FirefoxAddonIcon.png)](https://addons.mozilla.org/en-US/firefox/addon/deploysentinel-recorder/)
 
+Looking for a Cypress Studio alternative? Check out our
+[Cypress Recorder Plugin](https://github.com/DeploySentinel/cypress-recorder).
+
 # Demo
 
 ![Demo](assets/demo.gif)
@@ -88,3 +91,11 @@ Start Local Webpack Dev Server for Chrome: `yarn run start-chrome`
 Compressed Chrome Extension: `yarn run build-chrome`
 
 Run E2E Tests: `yarn test`
+
+---
+
+## Made with ❤️ by [DeploySentinel](https://deploysentinel.com)
+
+Use DeploySentinel to save hours of failed Cypress test debugging by using DOM,
+network, and console events captured from your CI.
+[Learn more.](https://deploysentinel.com)
